@@ -50,6 +50,7 @@ def exp(x,Lpl):
     """
     # x has already been truncated to start at xmin
     xmin = np.min(x)
+    ntail = len(x)
     # define log pdf, for use in likelihood calculation
     def logpdf(x,lam):
         result = np.log(1-np.exp(-lam))+lam*xmin - lam*x
@@ -61,3 +62,6 @@ def exp(x,Lpl):
     res = op.minimize(negloglike,lam0)
     lam = np.asscalar(res.x)
     loglike = -negloglike(lam)
+    # perform lrt: log-likelihood ratio between discrete power law
+    # andexponential distribution
+    

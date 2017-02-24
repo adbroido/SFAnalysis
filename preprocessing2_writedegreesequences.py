@@ -92,21 +92,21 @@ def checkconnected(g,fp,degdir, analysis, namekey='', bipkey=0, weighkey=0, dirk
     # if g is not connected, pull out the largest component
     if g.is_connected():
         compkey = 'connected'
-        readdeg(g,fp,degdir, analysis, namekey=namekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, compkey=compkey)
+        readdeg(g,fp,degdir, analysis, namekey=namekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
     else:
         compkey = 'entire'
-        readdeg(g,fp,degdir, analysis, namekey=namekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, compkey=compkey)
+        readdeg(g,fp,degdir, analysis, namekey=namekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
         clust = g.clusters() # note that the components function seems identical
         largecomp = g.subgraph(clust[0])
         newnamekey = namekey+ '_largestcomp'
         compkey = 'largest'
-        readdeg(largecomp,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, compkey=compkey)
+        readdeg(largecomp,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
 
 def processdirected(g, fp, degdir, analysis,  namekey='', bipkey=0, mpkey=0, weighkey=0, mgkey=0):
     keyV = [('in', '_directedin'), ('out','_directedout'), ('total', '_directedtotal')]
     for dirkey, dirnamekey in keyV:
         newnamekey = namekey+dirnamekey
-        checkconnected(g,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey)
+        checkconnected(g,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mgkey=0, mpkey=mpkey)
 
 def find_threshold(weights, target_num_edges, left=0):
     uniqueweights = np.unique(weights)

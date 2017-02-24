@@ -1,0 +1,12 @@
+git add -A
+git commit -m "description in here"
+git push origin master
+
+
+
+git status:   shows what's in staging area
+git reset:    clears the staging area (if you forgot to add something to .gitignore)
+
+files:
+.gitignore   *.pyc will ignore all files ending in .pyc, for example
+             dir/ will ignore everything in directory dir (you need the "/" after it)
