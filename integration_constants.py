@@ -44,7 +44,7 @@ def plconst(alpha, xmin):
     """ Computes the normalization constant on the discrete power law;
     i.e., computes C so that
 
-        C * sum from xmin to infinity of x^(-aplha) = 1
+        C * sum from xmin to infinity of x^(-alpha) = 1
 
     The formula below is obtained by noting that the sum above is equal to
 
