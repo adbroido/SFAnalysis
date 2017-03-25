@@ -75,7 +75,9 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
         df = pd.DataFrame(count_dict, columns = ['xvalue', 'counts'])
         csvfile = degdir+fn
         df.to_csv(csvfile, index=False)
-        analysis.loc[fn] = ''
+        # add new line if not already in index
+        if fn not in analysis.index:
+            analysis.loc[fn] = ''
         analysis.loc[fn]['Domain'] = domain
         analysis.loc[fn]['Subdomain'] = subdomain
         analysis.loc[fn]['fp_gml'] = fp
@@ -166,7 +168,6 @@ def processweighted(g, fp, degdir, analysis):
         oneweighted(g, fp, degdir, analysis, weights,thresh3, namekey, weighkey)
 
 def processmultigraph(g, fp, degdir, analysis, namekey='', mpkey=0, bipkey=0):
-    g.simplify()
     mgkey=0
     weighkey=0
     if sg.multigraph(g)==1:
@@ -175,6 +176,7 @@ def processmultigraph(g, fp, degdir, analysis, namekey='', mpkey=0, bipkey=0):
     if sg.weighted(g)==1:
         namekey += '_weightedsimplified'
         weighkey = 'simplified'
+    g.simplify()
     if sg.directed(g):
         processdirected(g,fp,degdir,analysis, namekey=namekey, mpkey=mpkey, bipkey=bipkey, mgkey=mgkey, weighkey=weighkey)
     else:
@@ -321,7 +323,7 @@ if __name__ == '__main__':
     #                                  'dln', 'dstrexp', 'dplwc'])
     analysis = pd.read_pickle('analysis.p')
     # trim catalog to relevant entries
-    catalog = catalog.query('Graph_order < 5 & Graph_order > 2')
+    catalog = catalog.query('Graph_order > 4 & Graph_order < 6')
     #fp = '/Volumes/Durodon/gmls/Biological/Food_web/n2/Aishihik_Lake_host-parasite_web_Aishihik_Lake_host-parasite_web_Biological_Food_web_n2.gml'
-    processgraphs(catalog,degdir,analysis)
+    processgraphs(catalog,degdir,analysis, overwrite=True)
     analysis.to_pickle('analysis.p')

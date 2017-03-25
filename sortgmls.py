@@ -37,7 +37,6 @@ def multigraph(g):
         df_entry = 1
     else:
         df_entry = 0
-        # if it was already there, we just return it
     return df_entry
 
 def directed(g):
