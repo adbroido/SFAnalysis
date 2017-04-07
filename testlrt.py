@@ -3,7 +3,8 @@ import fit
 import scipy.optimize as op
 import scipy.special as sp
 import integration_constants as ic
-from scipy.stats import norm
+from scipy.stats import norm, chi2
+import lrt
 
 def pllogpdf(x,alpha):
     logpdf = np.log(ic.plconst(np.array([alpha]), np.min(x))) -alpha*np.log(x)
@@ -36,60 +37,72 @@ def decide(logratio, p, decisionthresh=0.1):
             # PL better
             d = -1
         else:
-            # exp better
+            # alt better
             d = 1
     else:
         # inconclusive
         d = 0
     return d
 
-
-"""
-Perform likelihood ratio test for exponetial distribution. First fits an
-exponential distribution to the data. A Vuong statistic is calculated from
-the likelihoods of the exponential fit and the power law fit. The
-convergence criteria for exponential fitting is met by either hitting the
-maximum number of iterations, or by reaching a likelihood value at which a
-decision is statistically possible.
-
-Input:
-    x           ndarray, data set to be fit
-    alpha       float, exponent of power law fit
-
-Output:
-    dexp    int, decision about exponential distribution
-"""
-
-# define log pdf, for use in likelihood calculation
-def logpdf(x,lam):
-    xmin = np.min(x)
-    ntail = len(x)
-    result = np.log(1-np.exp(-lam))+lam*xmin - lam*x
-    return result
+def decidenested(logratio, p, decisionthresh):
+    """
+    Decisions are   1  -   power law better
+                    0  -   inconclusive
+                   -1  -   alternative dist better
+    """
+    if p <= decisionthresh and logratio < 0:
+            # alt better
+            d = -1
+    else:
+        # inconclusive
+        d = 0
+    return d
 
 
+def ln(x,alpha, decisionthresh):
+    """
+    Perform likelihood ratio test for log normal distribution. First
+    fits a log normal distribution to the data. A Vuong statistic is
+    calculated from the likelihoods of the exponential fit and the power law
+    fit. The convergence criteria for exponential fitting is met by either
+    hitting the maximum number of iterations, or by reaching a likelihood value
+    at which a decision is statistically possible.
 
+    Input:
+        x           ndarray, data set to be fit
+        alpha       float, exponent of power law fit
+
+    Output:
+        dstrexp    int, decision about exponential distribution
+    """
+    def logpdf(x, mu, sigma):
+        xmin = np.min(x)
+        F = lambda x: (sp.erfc((np.log(x)-mu)/(np.sqrt(2)*sigma)))/2
+        g = lambda x: F(x)- F(x+1)
+        h = -np.log(F(xmin))+np.log(g(x))
+        return h
+    # initial estimates
+    mu0 = 0
+    sigma0 = 1
+    theta0 = np.array([mu0, sigma0])
+    n = len(x)
+    # optimize
+    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
+    tol = 1E-1
+    bnds=[(-n/5,None),(tol,None)]
+    res = op.minimize(negloglike, theta0, bounds=bnds, method='L_BFGS_B')
+    theta = np.res.x
+    loglike = -negloglike(lam)
+    # perform lrt: Log-likelihood ratio between discrete power law and
+    # exponential distribution. This is done pointwise so that we can use
+    # Vuong's statistic to estimate the variance in the ratio
+    LplV = pllogpdf(x,alpha)
+    LlnV = logpdf(x,theta[0], theta[1])
+    R, p, normR = vuong(LplV, LlnV)
+    # check if statistically significant
+    dexp = decide(R, p, decisionthresh)
+    return dexp, R, p, loglike, normR
 
 terrfp = '/Users/annabroido/Dropbox/Research/LRTAnalysis/Code/pli-R-v0.0.3-2007-07-25/datasets/terrorism.txt'
 wordsfp = '/Users/annabroido/Dropbox/Research/LRTAnalysis/Code/pli-R-v0.0.3-2007-07-25/datasets/uniquewords.txt'
-xfull = np.loadtxt(terrfp, dtype=int)
-
-[alpha,xmin, ntail, Lpl, ks] = fit.pl(xfull)
-x = xfull[xfull>=xmin]
-ntail = len(x)
-lam0 = np.log(1+float(ntail)/np.sum(x-xmin))
-# define negative log likelihood, the function we wish to minimize
-negloglike = lambda lam: -np.sum(logpdf(x,lam))
-tol = 1E-9
-res = op.minimize(negloglike,lam0, bounds=[(tol,None)], method='L-BFGS-B')
-lam = np.asscalar(res.x)
-loglike = -negloglike(lam)
-# perform lrt: Log-likelihood ratio between discrete power law and
-# exponential distribution. This is done pointwise so that we can use
-# Vuong's statistic to estimate the variance in the ratio
-LplV = pllogpdf(x,alpha)
-LexpV = logpdf(x,lam)
-R, p, normR = vuong(LplV, LexpV)
-# check if statistically significant
-dexp = decide(R, p)
-dexp, R, p, loglike, normR
+xfull = np.loadtxt(wordsfp, dtype=int)

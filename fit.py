@@ -6,7 +6,7 @@ import time
 
 
 def pl(x):
-    """ Fits a tail-conditional exponential to a data set. This implements
+    """ Fits a tail-conditional power-law to a data set. This implements
     brute force optimization instead of using a built in optimizer.
 
     Input:
@@ -90,8 +90,6 @@ def pl(x):
     #print "xmin = %s" %xmin
     return [alpha,xmin, ntail, L, ks]
 
-
-
 def plpval(x, alpha, xmin, gof):
     """ Fits a tail-conditional exponential to a data set. This implements
     brute force optimization instead of using a built in optimizer.
@@ -172,3 +170,110 @@ def plpval(x, alpha, xmin, gof):
     p = np.sum(bootstraps>=gof)/float(num_resamps)
     print "p = %s   elapsed time = %s" %(p, time.time()-starttime)
     return p
+
+def exp(x):
+    """ Fits a tail-conditional exponential to a data set. The data is assumed
+    to begin at xmin. The logpdf is what is calculated and returned, as this is
+    more relevant for likelihood calculations.
+
+    Input:
+        x           ndarray, ndim = 1, dtype = integer
+
+    Output:
+        lam          float, exponential rate, must be > 0
+        LV           ndarray, pointwise log likelihood of the returned fit
+    """
+    xmin = np.min(x)
+    ntail = len(x)
+    # define log pdf
+    def logpdf(x,lam):
+        result = np.log(1-np.exp(-lam))+lam*xmin - lam*x
+        return result
+    # Moment based estimate for optimzation
+    lam0 = np.log(1+float(ntail)/np.sum(x-xmin))
+    # define negative log likelihood, the function we wish to minimize
+    negloglike = lambda lam: -np.sum(logpdf(x,lam))
+    tol = 1E-9
+    res = op.minimize(negloglike,lam0, bounds=[(tol,None)],method='L-BFGS-B')
+    lam = np.asscalar(res.x)
+    LV = logpdf(x,lam)
+    return [lam, LV]
+
+def plwc(x, alpha0=None):
+    """ Fits a tail-conditional power-law with exponential cutoff to a data set.
+    The data is assumed to begin at xmin. The logpdf is what is calculated and
+    returned, as this is more relevant for likelihood calculations.
+
+    Input:
+        x           ndarray, ndim = 1, dtype = integer
+        alpha0      float, power-law exponent (optional input)
+
+    Output:
+        alpha        float, exponent on x, must be > -1
+        lam          float, exponential rate, must be > 0
+        LV           ndarray, pointwise log likelihood of the returned fit
+    """
+    xmin = np.min(x)
+    ntail = len(x)
+    # define log pdf
+    def logpdf(x,alpha, lam):
+        xmin = np.min(x)
+        C = ic.plwcconst(alpha,lam, xmin)
+        result = -np.log(C) - alpha*np.log(x) - lam*x
+        return result
+    # Estimates for optimzation
+    if alpha0 is None:
+        alpha0 = pl(x)[0]
+    lam0 = exp(x)[0]
+    theta0 = np.array([alpha0,lam0])
+    # define negative log likelihood, the function we wish to minimize
+    negloglike = lambda theta: -np.sum(logpdf(x,theta[0], theta[1]))
+    tol = 1E-5
+    bnds=[(-1+tol,None),(tol,None)]
+    res = op.minimize(negloglike, theta0, bounds=bnds)
+    # res = op.minimize(negloglike,theta0, method='Nelder-Mead')
+    theta = res.x
+    alpha = theta[0]
+    lam = theta[1]
+    LV = logpdf(x,alpha, lam)
+    return [alpha, lam, LV]
+
+def ln(x):
+    """ Fits a tail-conditional log normal distribution to a data set.
+    The data is assumed to begin at xmin. The logpdf is what is calculated and
+    returned, as this is more relevant for likelihood calculations.
+    Discretization is done by approximating the normalization constant with a
+    finite sum.
+
+    Input:
+        x           ndarray, ndim = 1, dtype = integer
+
+    Output:
+        mu          float, mean of distribution, unbounded (though we impose a bound??)
+        s           float, standard deviation, must be > 0
+        LV          ndarray, pointwise log likelihood of the returned fit
+    """
+    xmin = np.min(x)
+    ntail = len(x)
+    # define log pdf
+    def logpdf(x,alpha, lam):
+        xmin = np.min(x)
+        C = ic.plwcconst(alpha,lam, xmin)
+        result = -np.log(C) - alpha*np.log(x) - lam*x
+        return result
+    # Estimates for optimzation
+    if alpha0 is None:
+        alpha0 = pl(x)[0]
+    lam0 = exp(x)[0]
+    theta0 = np.array([alpha0,lam0])
+    # define negative log likelihood, the function we wish to minimize
+    negloglike = lambda theta: -np.sum(logpdf(x,theta[0], theta[1]))
+    tol = 1E-5
+    bnds=[(-1+tol,None),(tol,None)]
+    res = op.minimize(negloglike, theta0,bounds=bnds)
+    # res = op.minimize(negloglike,theta0, method='Nelder-Mead')
+    theta = res.x
+    alpha = theta[0]
+    lam = theta[1]
+    LV = logpdf(x,alpha, lam)
+    return [alpha, lam, LV]

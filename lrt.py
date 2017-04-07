@@ -1,36 +1,9 @@
 import numpy as np
 import scipy.optimize as op
+import scipy.special as sp
 import integration_constants as ic
 import fit
-from scipy.stats import norm
-
-
-def nonnested(x, Lpl, decisionthresh=0.1):
-    """
-    Perform likelihood ratio tests for alternative distributions that are not
-    in the power law family.
-
-    Input:
-        x       ndarray, data set to be fit. Assumed to only have values above
-                the xmin value from the power law fit
-        Lpl     float, log likelihood of power law fit
-
-    Output:
-        dexp    int, decision about exponential distribution
-        dln     int, decision about log normal distribution
-        dstrexp int, decision about stretched exponential distribution
-                    Decisions are  -1  -   power law better
-                                    0  -   inconclusive
-                                    1  -   alternative dist better
-    """
-    # compare exponential
-    dexp = exp(x,Lpl, decisionthresh)
-    # compare log normal
-    dln = ln(x,Lpl, deicisionthresh)
-    # compare stretched exponential
-    dstrexp = strexp(x,Lpl, decisionthresh)
-
-    return [dexp, dln, dstrexp]
+from scipy.stats import norm, chi2
 
 def pllogpdf(x,alpha):
     logpdf = np.log(ic.plconst(np.array([alpha]), np.min(x))) -alpha*np.log(x)
@@ -55,22 +28,40 @@ def vuong(LplV, LaltV):
     return R, p2, normR
 
 def decide(logratio, p, decisionthresh):
+    """
+    Decisions are   1  -   power law better
+                    0  -   inconclusive
+                   -1  -   alternative dist better
+    """
     if p <= decisionthresh:
         if logratio == 0:
             d = 0
         elif logratio > 0:
             # PL better
-            d = -1
-        else:
-            # exp better
             d = 1
+        else:
+            # alt better
+            d = -1
     else:
         # inconclusive
         d = 0
     return d
 
+def decidenested(logratio, p, decisionthresh):
+    """
+    Decisions are   1  -   power law better
+                    0  -   inconclusive
+                   -1  -   alternative dist better
+    """
+    if p <= decisionthresh & logratio < 0:
+            # alt better
+            d = -1
+    else:
+        # inconclusive
+        d = 0
+    return d
 
-def exp(x,alpha, decisionthresh):
+def exp(x,LplV, decisionthresh):
     """
     Perform likelihood ratio test for exponetial distribution. First fits an
     exponential distribution to the data. A Vuong statistic is calculated from
@@ -80,36 +71,21 @@ def exp(x,alpha, decisionthresh):
     decision is statistically possible.
 
     Input:
-        x           ndarray, data set to be fit
-        alpha       float, exponent of power law fit
+        x           ndarray, data set to be fit (has been truncated to start
+                    at xmin)
+        LplV        ndarray, pointwise likelihood values for power-law fit
 
     Output:
         dexp    int, decision about exponential distribution
     """
-    # x has already been truncated to start at xmin
-    xmin = np.min(x)
-    ntail = len(x)
-    # define log pdf, for use in likelihood calculation
-    def logpdf(x,lam):
-        result = np.log(1-np.exp(-lam))+lam*xmin - lam*x
-        return result
-    # Moment based estimate for optimzation
-    lam0 = np.log(1+float(ntail)/np.sum(x-xmin))
-    # define negative log likelihood, the function we wish to minimize
-    negloglike = lambda lam: -np.sum(logpdf(x,lam))
-    tol = 1E-9
-    res = op.minimize(negloglike,lam0, bounds=[(tol,None)],method='L-BFGS-B')
-    lam = np.asscalar(res.x)
-    loglike = -negloglike(lam)
     # perform lrt: Log-likelihood ratio between discrete power law and
     # exponential distribution. This is done pointwise so that we can use
     # Vuong's statistic to estimate the variance in the ratio
-    LplV = pllogpdf(x,alpha)
-    LexpV = logpdf(x,lam)
+    [lam, LexpV] = fit.exp(x)
     R, p, normR = vuong(LplV, LexpV)
     # check if statistically significant
     dexp = decide(R, p, decisionthresh)
-    return dexp, R, p, loglike, normR
+    return dexp, R, p, loglike, normR, lam
 
 def strexp(x,alpha, decisionthresh):
     """
@@ -223,36 +199,23 @@ def ln(x,alpha, decisionthresh):
     Output:
         dstrexp    int, decision about exponential distribution
     """
-    # x has already been truncated to start at xmin
-    def arg(x):
-        arg = (np.log(x)-mu)/(np.sqrt(2)*s)
-        return arg
-    # define log likelihood
-    def lnloglike(x, mu, s):
-        """
-        compute PMF as increments of the continuous distribution function. All
-        distributions are tail-conditional.
-        """
+    def logpdf(x, mu, sigma):
         xmin = np.min(x)
-        n = len(x)
-        # 1/constant of normalization is P(X>=xmin), since discretized use P(X>=xmin-0.5)
-        Cm = (1./2)*(1-sp.erf(arg(xmin-0.5)))
-        L = -n*np.log(Cm) + np.sum(np.log(0.5*(sp.erfc(arg(x-0.5))-sp.erfc(arg(x+0.5)))))
-        return L
-
-    def logpdf(x,mu,s):
-        Cm = (1./2)*(1-sp.erf(arg(xmin-0.5)))
-        f = -np.log(Cm) + np.log(0.5*(sp.erfc(arg(x-0.5))-sp.erfc(arg(x+0.5))))
-        return f
-
-    # initial parameter estimate for optimzation
-    theta0 = [np.mean(np.log(x)),np.std(np.log(x))]
-    # define negative log likelihood, the function we wish to minimize
-    negloglike =lambda theta: -loglikelihood(x,theta[0],theta[1])
-    tol = 1E-5
-    bounds=[(tol,None),(tol,None)]
-    res = op.minimize(negloglike,theta0, method='Nelder-Mead')
-    theta = np.asscalar(res.x)
+        F = lambda x: (sp.erfc((np.log(x)-mu)/(np.sqrt(2)*sigma)))/2
+        g = lambda x: F(x)- F(x+1)
+        h = -np.log(F(xmin))+np.log(g(x))
+        return h
+    # initial estimates
+    mu0 = 0
+    sigma0 = 1
+    theta0 = np.array([mu0, sigma0])
+    n = len(x)
+    # optimize
+    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
+    tol = 1E-1
+    bnds=[(-n/5,None),(tol,None)]
+    res = op.minimize(negloglike, theta0, bounds=bnds, method='L_BFGS_B')
+    theta = np.res.x
     loglike = -negloglike(lam)
     # perform lrt: Log-likelihood ratio between discrete power law and
     # exponential distribution. This is done pointwise so that we can use
@@ -263,3 +226,55 @@ def ln(x,alpha, decisionthresh):
     # check if statistically significant
     dexp = decide(R, p, decisionthresh)
     return dexp, R, p, loglike, normR
+
+def nested(x, decisionthresh=0.1):
+    """
+    Perform likelihood ratio tests for alternative distributions that are not
+    in the power law family.
+
+    Input:
+        x       ndarray, data set to be fit. Assumed to only have values above
+                the xmin value from the power law fit
+
+    Output:
+        dplwc    int, decision about power law with exponential cutoff
+                    Decisions are   1  -   power law better
+                                    0  -   inconclusive
+                                   -1  -   alternative dist better
+    """
+    LplV = pllogpdf(x,alpha)
+    Lpl = np.sum(LplV)
+    # compare plwc
+    [alpha, lam, LplwcV] = fit.plwc(x, alpha)
+    Lplwc = np.sum(LplwcV)
+    R = Lpl-Lplwc
+    p = 1-chi2.cdf(-2*R, df=1)
+    dplwc = decidenested(R, p, 0.1)
+    return dplwc
+
+def nonnested(x, decisionthresh=0.1):
+    """
+    Perform likelihood ratio tests for alternative distributions that are not
+    in the power law family.
+
+    Input:
+        x       ndarray, data set to be fit. Assumed to only have values above
+                the xmin value from the power law fit
+
+    Output:
+        dexp    int, decision about exponential distribution
+        dln     int, decision about log normal distribution
+        dstrexp int, decision about stretched exponential distribution
+                    Decisions are   1  -   power law better
+                                    0  -   inconclusive
+                                   -1  -   alternative dist better
+    """
+    LplV = pllogpdf(x,alpha)
+    # compare exponential
+    dexp = exp(x,LplV, decisionthresh)
+    # compare log normal
+    dln = ln(x,LplV, deicisionthresh)
+    # compare stretched exponential
+    dstrexp = strexp(x,LplV, decisionthresh)
+
+    return [dexp, dln, dstrexp]
