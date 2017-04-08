@@ -90,9 +90,9 @@ def ln(x,alpha, decisionthresh):
     negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
     tol = 1E-1
     bnds=[(-n/5,None),(tol,None)]
-    res = op.minimize(negloglike, theta0, bounds=bnds, method='L_BFGS_B')
-    theta = np.res.x
-    loglike = -negloglike(lam)
+    res = op.minimize(negloglike, theta0, bounds=bnds, method='L-BFGS-B')
+    theta = res.x
+    loglike = -negloglike(theta)
     # perform lrt: Log-likelihood ratio between discrete power law and
     # exponential distribution. This is done pointwise so that we can use
     # Vuong's statistic to estimate the variance in the ratio
@@ -105,4 +105,6 @@ def ln(x,alpha, decisionthresh):
 
 terrfp = '/Users/annabroido/Dropbox/Research/LRTAnalysis/Code/pli-R-v0.0.3-2007-07-25/datasets/terrorism.txt'
 wordsfp = '/Users/annabroido/Dropbox/Research/LRTAnalysis/Code/pli-R-v0.0.3-2007-07-25/datasets/uniquewords.txt'
-xfull = np.loadtxt(wordsfp, dtype=int)
+xfull = np.loadtxt(terrfp, dtype=int)
+[alpha,xmin, ntail, Lpl, ks] = fit.pl(xfull)
+x = xfull[xfull>=xmin]

@@ -53,7 +53,7 @@ def decidenested(logratio, p, decisionthresh):
                     0  -   inconclusive
                    -1  -   alternative dist better
     """
-    if p <= decisionthresh & logratio < 0:
+    if p <= decisionthresh and logratio < 0:
             # alt better
             d = -1
     else:
@@ -61,7 +61,7 @@ def decidenested(logratio, p, decisionthresh):
         d = 0
     return d
 
-def exp(x,LplV, decisionthresh):
+def exp(x, LplV, decisionthresh):
     """
     Perform likelihood ratio test for exponetial distribution. First fits an
     exponential distribution to the data. A Vuong statistic is calculated from
@@ -85,105 +85,9 @@ def exp(x,LplV, decisionthresh):
     R, p, normR = vuong(LplV, LexpV)
     # check if statistically significant
     dexp = decide(R, p, decisionthresh)
-    return dexp, R, p, loglike, normR, lam
+    return dexp
 
-def strexp(x,alpha, decisionthresh):
-    """
-    Perform likelihood ratio test for stretched exponetial distribution. First
-    fits a stretched exponential distribution to the data. A Vuong statistic is
-    calculated from the likelihoods of the exponential fit and the power law
-    fit. The convergence criteria for exponential fitting is met by either
-    hitting the maximum number of iterations, or by reaching a likelihood value
-    at which a decision is statistically possible.
-
-    Note: There are several functions which all claim to be the "discrete
-    Weibull" distribution, this code uses the Nakagawa-Osaki discretization,
-    see http://ljk.imag.fr/membres/Olivier.Gaudoin/ICRSA03Gaudoin.pdf for
-    lists of others
-
-    Input:
-        x           ndarray, data set to be fit
-        alpha       float, exponent of power law fit
-
-    Output:
-        dstrexp    int, decision about exponential distribution
-    """
-    # x has already been truncated to start at xmin
-    # define cts pdf for discretization
-    def initialguessweib(x):
-        """
-        The follow is not an efficient estimator of the shape, but serves to start
-        the approximation process off.  (See Johnson and Katz, ch. 20, section 6.3,
-        "Estimators Based on Distribution of log X".)
-        """
-        xmin = np.min(x)
-        n = len(x)
-        shape = (np.sqrt(6)/np.pi)*np.std(np.log(x))
-        scale = (np.sum(x**shape)/n)**(1/shape)
-        return np.array([shape,scale])
-
-    def logctscdf(x,a,b):
-        """
-        Calculate the log cumulative distribution function (pdf) of data from a
-        tail-conditional continuous stretched exponential:
-
-            f(x) = (a/b) exp((xmin/b)^a) (x/b)^(a-1) exp(- (x/b)^a)
-            F(x) = 1- exp((xmin/b)^a)*exp(-(x/b)^a)
-
-        where a is shape and b is scale. This function returns the log of the
-        upper tail cdf, ie P(X > x) = 1 - P(X>=x):
-            F(x) = exp((xmin/b)^a)*exp(-(x/b)^a)
-            lF(x)= (xmin/b)^a - (x/b)^a
-
-        Inputs:
-        x = vector of data to be fit. Assumed to be truncated (only x>=xmin)
-        a = shape parameter
-        b = scale paramter
-
-        Output:
-        lF = cdf of x
-        """
-        xmin = np.min(x)
-        lF = (xmin/b)**a - (x/b)**a
-        return lF
-
-    # define log pdf, for use in likelihood calculation
-    def logpdf(x, a, b):
-        """
-        compute PMF as increments of the continuous distribution function. All
-        distributions are tail-conditional.
-        Do calculations on a logarithmic scale:
-        Let log(b) - log(a) = h = log(b/a), b > a
-        Then b-a = a(b/a - 1) = a(exp(log(b/a)) - 1) = a(exp(h) - 1)
-        log(b-a) = log(a) + log(exp(h) - 1)
-        """
-        lF1 = logctscdf(x,a,b)
-        lF2 = logctscdf(x+1,a,b)
-        result = lF2 + np.log(np.exp(lF1-lF2)-1)
-        return result
-
-
-    # initial parameter estimate for optimzation
-    theta0 = initialguessweib(x)
-    # define negative log likelihood, the function we wish to minimize
-    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
-    tol = 1E-5
-    bounds=[(tol,None),(tol,None)]
-    res = op.minimize(negloglike,theta0, method='Nelder-Mead')
-    theta = res.x
-    loglike = -negloglike(lam)
-    # perform lrt: Log-likelihood ratio between discrete power law and
-    # exponential distribution. This is done pointwise so that we can use
-    # Vuong's statistic to estimate the variance in the ratio
-    # NOTE: MIGHT NOT NEED SOME OF THIS ABOVE STUFF
-    LplV = pllogpdf(x,alpha)
-    LexpV = logpdf(x,lam)
-    R, p, normR = vuong(LplV, LexpV)
-    # check if statistically significant
-    dexp = decide(R, p, decisionthresh)
-    return dexp, R, p, loglike, normR
-
-def ln(x,alpha, decisionthresh):
+def ln(x,LplV, decisionthresh):
     """
     Perform likelihood ratio test for log normal distribution. First
     fits a log normal distribution to the data. A Vuong statistic is
@@ -197,37 +101,42 @@ def ln(x,alpha, decisionthresh):
         alpha       float, exponent of power law fit
 
     Output:
-        dstrexp    int, decision about exponential distribution
+        dln    int, decision about log-normal distribution
     """
-    def logpdf(x, mu, sigma):
-        xmin = np.min(x)
-        F = lambda x: (sp.erfc((np.log(x)-mu)/(np.sqrt(2)*sigma)))/2
-        g = lambda x: F(x)- F(x+1)
-        h = -np.log(F(xmin))+np.log(g(x))
-        return h
-    # initial estimates
-    mu0 = 0
-    sigma0 = 1
-    theta0 = np.array([mu0, sigma0])
-    n = len(x)
-    # optimize
-    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
-    tol = 1E-1
-    bnds=[(-n/5,None),(tol,None)]
-    res = op.minimize(negloglike, theta0, bounds=bnds, method='L_BFGS_B')
-    theta = np.res.x
-    loglike = -negloglike(lam)
-    # perform lrt: Log-likelihood ratio between discrete power law and
-    # exponential distribution. This is done pointwise so that we can use
-    # Vuong's statistic to estimate the variance in the ratio
-    LplV = pllogpdf(x,alpha)
-    LlnV = logpdf(x,theta[0], theta[1])
+    [theta,LlnV] = fit.ln(x)
     R, p, normR = vuong(LplV, LlnV)
     # check if statistically significant
-    dexp = decide(R, p, decisionthresh)
-    return dexp, R, p, loglike, normR
+    dln = decide(R, p, decisionthresh)
+    return dln
 
-def nested(x, decisionthresh=0.1):
+def strexp(x,LplV, decisionthresh):
+    """
+    Perform likelihood ratio test for stretched exponetial distribution. First
+    fits a stretched exponential (weibull) distribution to the data. A Vuong
+    statistic is calculated from the likelihoods of the exponential fit and the
+    power law fit. The convergence criteria for exponential fitting is met by
+    either hitting the maximum number of iterations, or by reaching a likelihood
+    value at which a decision is statistically possible.
+
+    Note: There are several functions which all claim to be the "discrete
+    Weibull" distribution, this code uses the Nakagawa-Osaki discretization,
+    see http://ljk.imag.fr/membres/Olivier.Gaudoin/ICRSA03Gaudoin.pdf for
+    lists of others
+
+    Input:
+        x           ndarray, data set to be fit
+        alpha       float, exponent of power law fit
+
+    Output:
+        dstrexp    int, decision about exponential distribution
+    """
+    [theta, LstrexpV] = fit.strexp(x)
+    R, p, normR = vuong(LplV, LstrexpV)
+    # check if statistically significant
+    dstrexp = decide(R, p, decisionthresh)
+    return dstrexp
+
+def nested(x, alpha, decisionthresh=0.1):
     """
     Perform likelihood ratio tests for alternative distributions that are not
     in the power law family.
@@ -252,7 +161,7 @@ def nested(x, decisionthresh=0.1):
     dplwc = decidenested(R, p, 0.1)
     return dplwc
 
-def nonnested(x, decisionthresh=0.1):
+def nonnested(x, alpha, decisionthresh=0.1):
     """
     Perform likelihood ratio tests for alternative distributions that are not
     in the power law family.
@@ -273,7 +182,7 @@ def nonnested(x, decisionthresh=0.1):
     # compare exponential
     dexp = exp(x,LplV, decisionthresh)
     # compare log normal
-    dln = ln(x,LplV, deicisionthresh)
+    dln = ln(x,LplV, decisionthresh)
     # compare stretched exponential
     dstrexp = strexp(x,LplV, decisionthresh)
 

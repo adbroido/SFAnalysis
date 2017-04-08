@@ -199,6 +199,44 @@ def exp(x):
     LV = logpdf(x,lam)
     return [lam, LV]
 
+def ln(x):
+    """ Fits a tail-conditional log normal distribution to a data set.
+    The data is assumed to begin at xmin. The logpdf is what is calculated and
+    returned, as this is more relevant for likelihood calculations.
+    Discretization is done by binning the continuous distrbution (see text for details)
+
+    Input:
+        x           ndarray, ndim = 1, dtype = integer
+
+    Output:
+        mu          float, mean of distribution, unbounded (though we impose a bound)
+        sigma       float, standard deviation, must be > 0
+        LV          ndarray, pointwise log likelihood of the returned fit
+    """
+    xmin = np.min(x)
+    ntail = len(x)
+    # define log pdf
+    def logpdf(x, mu, sigma):
+        xmin = np.min(x)
+        F = lambda x: (sp.erfc((np.log(x)-mu)/(np.sqrt(2)*sigma)))/2
+        g = lambda x: F(x)- F(x+1)
+        h = -np.log(F(xmin))+np.log(g(x))
+        return h
+    # initial estimates
+    mu0 = 0
+    sigma0 = 1
+    theta0 = np.array([mu0, sigma0])
+    n = len(x)
+    # optimize
+    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
+    tol = 1E-1
+    bnds=[(-n/5,None),(tol,None)]
+    res = op.minimize(negloglike, theta0, bounds=bnds, method='L-BFGS-B')
+    theta = res.x
+    loglike = -negloglike(theta)
+    LV = logpdf(x,theta[0], theta[1])
+    return [theta, LV]
+
 def plwc(x, alpha0=None):
     """ Fits a tail-conditional power-law with exponential cutoff to a data set.
     The data is assumed to begin at xmin. The logpdf is what is calculated and
@@ -238,42 +276,51 @@ def plwc(x, alpha0=None):
     LV = logpdf(x,alpha, lam)
     return [alpha, lam, LV]
 
-def ln(x):
-    """ Fits a tail-conditional log normal distribution to a data set.
+def strexp(x):
+    """ Fits a tail-conditional stretched exponential distribution to a data set.
     The data is assumed to begin at xmin. The logpdf is what is calculated and
     returned, as this is more relevant for likelihood calculations.
-    Discretization is done by approximating the normalization constant with a
-    finite sum.
+    Discretization is done by binning the continuous distrbution (see text for details)
 
     Input:
         x           ndarray, ndim = 1, dtype = integer
 
     Output:
-        mu          float, mean of distribution, unbounded (though we impose a bound??)
-        s           float, standard deviation, must be > 0
+        a           float, mean of distribution, unbounded (though we impose a bound??)
+        b           float, standard deviation, must be > 0
         LV          ndarray, pointwise log likelihood of the returned fit
     """
     xmin = np.min(x)
     ntail = len(x)
     # define log pdf
-    def logpdf(x,alpha, lam):
+    def initialguessweib(x):
+        """
+        The follow is not an efficient estimator of the shape, but serves to start
+        the approximation process off.  (See Johnson and Katz, ch. 20, section 6.3,
+        "Estimators Based on Distribution of log X".)
+        """
         xmin = np.min(x)
-        C = ic.plwcconst(alpha,lam, xmin)
-        result = -np.log(C) - alpha*np.log(x) - lam*x
-        return result
-    # Estimates for optimzation
-    if alpha0 is None:
-        alpha0 = pl(x)[0]
-    lam0 = exp(x)[0]
-    theta0 = np.array([alpha0,lam0])
-    # define negative log likelihood, the function we wish to minimize
-    negloglike = lambda theta: -np.sum(logpdf(x,theta[0], theta[1]))
+        n = len(x)
+        shape = (np.sqrt(6)/np.pi)*np.std(np.log(x))
+        scale = (np.sum(x**shape)/n)**(1/shape)
+        return np.array([shape,scale])
+
+    # define log pdf, for use in likelihood calculation
+    def logpdf(x, a, b):
+        xmin = np.min(x)
+        F = lambda x: np.exp(-(x/b)**a)
+        g = lambda x: F(x)-F(x+1)
+        h = -np.log(F(xmin))+np.log(g(x))
+        return h
+    # initial estimates
+    # initial estimates
+    theta0 = initialguessweib(x)
+    # optimize
+    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
     tol = 1E-5
-    bnds=[(-1+tol,None),(tol,None)]
-    res = op.minimize(negloglike, theta0,bounds=bnds)
-    # res = op.minimize(negloglike,theta0, method='Nelder-Mead')
+    bnds=[(tol,1),(0.01,None)]
+    res = op.minimize(negloglike, theta0, bounds=bnds, method='L-BFGS-B')
     theta = res.x
-    alpha = theta[0]
-    lam = theta[1]
-    LV = logpdf(x,alpha, lam)
-    return [alpha, lam, LV]
+    loglike = -negloglike(theta)
+    LV = logpdf(x,theta[0], theta[1])
+    return [theta, LV]

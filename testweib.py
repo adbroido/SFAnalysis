@@ -2,6 +2,53 @@ import numpy as np
 import scipy.special as sp
 import scipy.optimize as op
 import fit
+from scipy.stats import norm
+import integration_constants as ic
+
+
+def pllogpdf(x,alpha):
+    logpdf = np.log(ic.plconst(np.array([alpha]), np.min(x))) -alpha*np.log(x)
+    return logpdf
+
+def vuong(LplV, LaltV):
+    logratioV = LplV - LaltV
+    n = len(logratioV)
+    R = np.sum(logratioV)
+    # mean of normal dist
+    mu = np.mean(logratioV)
+    # standard deviation of normal dist
+    sigma = np.std(logratioV)
+    normR = (1/np.sqrt(n))*R/sigma
+    vuongstat = np.sqrt(n)*mu/sigma
+    # one-sided p-value
+    p1 = norm.cdf(vuongstat)
+    if p1 > 0.5:
+        p1 = 1-p1
+    # 2-sided p-value
+    p2 = 2*p1
+    return R, p2, normR
+
+
+def decide(logratio, p, decisionthresh):
+    """
+    Decisions are   1  -   power law better
+                    0  -   inconclusive
+                   -1  -   alternative dist better
+    """
+    if p <= decisionthresh:
+        if logratio == 0:
+            d = 0
+        elif logratio > 0:
+            # PL better
+            d = 1
+        else:
+            # alt better
+            d = -1
+    else:
+        # inconclusive
+        d = 0
+    return d
+
 
 """
 Perform likelihood ratio test for stretched exponetial distribution. First
@@ -47,75 +94,13 @@ def initialguessweib(x):
     h,H are for discrete, where x>= xmin
     h(x; mu, sigma) = (1/(0.5-F(xmin-1)))*g(x), x>=xmin
 """
-def fitbin(x, meth):
-    def logpdf(x, a, b):
-        xmin = np.min(x)
-        F = lambda x: np.exp(-(x/b)**a)
-        g = lambda x: F(x)-F(x+1)
-        h = -np.log(F(xmin))+np.log(g(x))
-        return h
-    # initial estimates
-    theta0 = initialguessweib(x)
-    # optimize
-    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
-    tol = 1E-5
-    bnds=[(tol,None),(tol,None)]
-    if meth == 'Nelder-Mead':
-        res = op.minimize(negloglike, theta0, method='Nelder-Mead')
-    else:
-        res = op.minimize(negloglike, theta0, bounds=bnds, method=meth)
-    return [theta0, res]
 
-def checkbin(xmin, theta):
-    mu = theta[0]
-    sigma = theta[1]
-    xvec = np.arange(xmin ,xmin+100000)
-    F = lambda x: lambda x: 1- np.exp(-(x/b)**a)
-    g = lambda x: F(x+1)-F(x)
-    h = (1/(1-F(xmin)))*g(xvec)
-    tot = np.sum(h)
-    return tot
-
-"""
-    Version 2: brute force summed
-    f,F are for cts x, where x>=1
-    g,G are for discrete x, where x>=xmin
-    f(x) = (1/x) exp(-(log(x)-mu)^2/(sqrt(2)*sigma))
-    C = (sum(f(x) from x = xmin to infinity )
-    g(x) = (1/C)*f(x), x>=xmin
-
-"""
-def fitsum(x, meth):
-    def logpdf(x, mu, sigma):
-        xmin = np.min(x)
-        f = lambda x: np.exp(-((np.log(x)-mu)**2)/(np.sqrt(2)*sigma))/x
-        xvec = np.arange(xmin, xmin+100000)
-        C = np.sum(f(xvec))
-        g = -np.log(C)+np.log(f(x))
-        return g
-    # initial estimates
-    mu0 = np.mean(np.log(x))
-    sigma0 = np.std(np.log(x))
-    theta0 = np.array([mu0, sigma0])
-    # optimize
-    negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
-    tol = 1E-5
-    bnds=[(-800,None),(tol,None)]
-    if meth == 'Nelder-Mead':
-        res = op.minimize(negloglike, theta0, method='Nelder-Mead')
-    else:
-        res = op.minimize(negloglike, theta0, bounds=bnds, method=meth)
-    return [theta0, res]
-
-def checksum(xmin, theta):
-    mu = theta[0]
-    sigma = theta[1]
-    f = lambda x: np.exp(-((np.log(x)-mu)**2)/(np.sqrt(2)*sigma))/x
-    xvec = np.arange(xmin, xmin+100000)
-    C = np.sum(f(xvec))
-    g = (1/C)*f(xvec)
-    tot = np.sum(g)
-    return tot
+def logpdf(x, a, b):
+    xmin = np.min(x)
+    F = lambda x: np.exp(-(x/b)**a)
+    g = lambda x: F(x)-F(x+1)
+    h = -np.log(F(xmin))+np.log(g(x))
+    return h
 
 
 
@@ -125,81 +110,20 @@ xfull = np.loadtxt(words, dtype=int)
 [alpha,xmin, ntail, Lpl, ks] = fit.pl(xfull)
 x = xfull[xfull>=xmin]
 
-nelderbin = fitbin(x, 'Nelder-Mead')
-boundedbin = fitbin(x, 'L-BFGS-B')
-newtonbin = fitbin(x, 'TNC')
-print 'Nelder binned = %s' %nelderbin[1].x
-print 'Bounded binned = %s' %boundedbin[1].x
-print 'Newton binned = %s' %newtonbin[1].x
-
-neldersum = fitsum(x, 'Nelder-Mead')
-boundedsum = fitsum(x, 'L-BFGS-B')
-newtonsum = fitsum(x, 'TNC')
-print 'Nelder summed = %s' %neldersum[1].x
-print 'Bounded summed = %s' %boundedsum[1].x
-print 'Newton summed = %s' %newtonsum[1].x
-
-
-
-# PLOT TIME
-import matplotlib.pyplot as plt
-
-def pdfbin(x, theta):
-    mu = theta[0]
-    sigma = theta[1]
-    xmin = np.min(x)
-    F = lambda x: (1+sp.erf((np.log(x)-mu)/(np.sqrt(2)*sigma)))/2
-    g = lambda x: F(x)-F(x-1)
-    h = (1/(1-F(xmin-1)))*g(x)
-    return h
-
-def cdfbin(x, theta):
-    H = np.cumsum(pdfbin(x,theta))
-    return H
-
-def pdfsum(x, theta):
-    mu = theta[0]
-    sigma = theta[1]
-    xmin = np.min(x)
-    f = lambda x: np.exp(-((np.log(x)-mu)**2)/(np.sqrt(2)*sigma))/x
-    xvec = np.arange(xmin, xmin+100000)
-    C = np.sum(f(xvec))
-    g = (1/C)*f(x)
-    return g
-
-def cdfsum(x, theta):
-    H = np.cumsum(pdfsum(x,theta))
-    return H
-
-def pdfcts(x, theta):
-    mu = theta[0]
-    sigma = theta[1]
-    xmin = np.min(x)
-    f = lambda x: np.exp(-((np.log(x)-mu)**2)/(np.sqrt(2)*sigma))/x
-    C = np.sqrt(2/(np.pi*sigma**2))*(1/sp.erfc((np.log(xmin)-mu)/(np.sqrt(2)*sigma)))
-    g = C*f(x)
-    return g
-
-def cdfcts(x, theta):
-    H = np.cumsum(pdfcts(x,theta))
-    return H
-
-def plotpdf(x, theta):
-    # pdf plot
-    plt.plot(xvec, pdfbin(xvec,theta),label='Binned PMF')
-    plt.plot(xvec, pdfsum(xvec,theta), label='Summed PMF')
-    plt.plot(xvec, pdfcts(xvec,theta), label='Continuous PDF')
-    plt.legend()
-    plt.show()
-
-def plotcdf(x, theta):
-    # cdf plot
-    binnedcdf = plt.plot(xvec, cdfbin(xvec,theta), label='Binned CDF')
-    summedcdf = plt.plot(xvec, cdfsum(xvec,theta), label='Summed CDF')
-    #ctscdf = plt.plot(xvec, cdfcts(xvec,theta), label='Continuous CDF')
-    plt.legend()
-    plt.show()
-
-# MAKE PLOTS
-xvec = np.arange(xmin,xmin+10)
-theta = [7,3]
+# initial estimates
+theta0 = initialguessweib(x)
+# optimize
+negloglike = lambda theta: -np.sum(logpdf(x,theta[0],theta[1]))
+tol = 1E-5
+bnds=[(tol,1),(0.01,None)]
+res = op.minimize(negloglike, theta0, bounds=bnds, method='L-BFGS-B')
+print(res)
+theta = res.x
+loglike = -negloglike(theta)
+LplV = pllogpdf(x,alpha)
+LstrexpV = logpdf(x,theta[0], theta[1])
+R, p, normR = vuong(LplV, LstrexpV)
+# check if statistically significant
+decisionthresh=0.1
+dexp = decide(R, p, decisionthresh)
+print dexp, R, p, loglike, normR

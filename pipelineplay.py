@@ -100,13 +100,3 @@ analysis.to_pickle('analysis.p')
 # now run the LRT analysis. Later make these one step
 analysis = lrtanalysis(degfiles, analysis)
 analysis.to_pickle('analysis.p')
-
-
-
-# compare the alternative distributions
-# compare the non-nested alternatives, return the decisions for each
-[dexp, dln, dstrexp] = lrt.nonnested(x, Lpl)
-# fit the nested alternatives
-[dpls, dplwc] = lrt.nested(x, Lpl)
-# save the output
-analysis = pd.Series([name, xmin, dexp, dln, dstrexp, dpls, dplwc])
