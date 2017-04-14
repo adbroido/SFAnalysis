@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, '/Users/annabroido/Dropbox/Research/LRTanalysis/LRTanalysis/analysis/')
 import numpy as np
 import igraph
 import glob
