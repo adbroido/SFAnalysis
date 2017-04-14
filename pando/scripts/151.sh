@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Leather_plant-herbivore_webs_Finland_Biological_Food_web_n2.gml_bipartitefulldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Leather_plant-herbivore_webs_Finland_Biological_Food_web_n2.gml_bipartitefulldistribution.txt.csv

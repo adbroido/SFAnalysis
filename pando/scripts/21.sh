@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/McCullen_plant-pollinator_web_McCullen_plant-pollinator_web_Biological_Food_web_n3.gml_bipartitefulldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/McCullen_plant-pollinator_web_McCullen_plant-pollinator_web_Biological_Food_web_n3.gml_bipartitefulldistribution.txt.csv

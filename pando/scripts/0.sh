@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/anbr3575/LRTanalysis/pipelinetest.py /Users/anbr3575/degreesequences/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefulldistribution.txt /Users/anbr3575/output/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefulldistribution.txt.csv

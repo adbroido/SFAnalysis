@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefull_largestcompdistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefull_largestcompdistribution.txt.csv

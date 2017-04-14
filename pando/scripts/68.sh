@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Rat_brain_2011-2013_Rat_rattus_norvegicus_brain_3_2013_Biological_Connectome_n3.gml_multiplex3.0_directedoutdistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Rat_brain_2011-2013_Rat_rattus_norvegicus_brain_3_2013_Biological_Connectome_n3.gml_multiplex3.0_directedoutdistribution.txt.csv

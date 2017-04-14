@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/ITC99_Benchmark_Circuits_b11_Technological_Digital_Circuit_n3.gml_directedtotaldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/ITC99_Benchmark_Circuits_b11_Technological_Digital_Circuit_n3.gml_directedtotaldistribution.txt.csv

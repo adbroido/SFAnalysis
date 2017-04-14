@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Political_blogs_network_2004_Political_Blogs_Informational_Web_graph_n3.gml_multigraphsimplified_directedtotaldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Political_blogs_network_2004_Political_Blogs_Informational_Web_graph_n3.gml_multigraphsimplified_directedtotaldistribution.txt.csv

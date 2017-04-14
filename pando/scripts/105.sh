@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Software_function-callgraphs_2002_Digital_Material_4_3_2002_Technological_Software_n3.gml_directedtotaldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Software_function-callgraphs_2002_Digital_Material_4_3_2002_Technological_Software_n3.gml_directedtotaldistribution.txt.csv

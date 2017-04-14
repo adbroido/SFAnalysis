@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Water_Distribution_Network_Balerma_Irrigation_Technological_Water_Distribution_n3.gmldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Water_Distribution_Network_Balerma_Irrigation_Technological_Water_Distribution_n3.gmldistribution.txt.csv

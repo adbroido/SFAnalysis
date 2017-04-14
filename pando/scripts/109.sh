@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Kato_plant-pollinator_web_Kato_plant-pollinator_web_Biological_Food_web_n3.gml_bipartitefull_weightedsimplified_largestcompdistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Kato_plant-pollinator_web_Kato_plant-pollinator_web_Biological_Food_web_n3.gml_bipartitefull_weightedsimplified_largestcompdistribution.txt.csv

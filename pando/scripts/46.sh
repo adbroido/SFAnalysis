@@ -1,0 +1,2 @@
+#!/bin/bash
+python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Binary_interactomes_various_species_2012_S_pombe_972H_fission_yeast_binary_hq_Biological_Protein_interactions_n3.gmldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Binary_interactomes_various_species_2012_S_pombe_972H_fission_yeast_binary_hq_Biological_Protein_interactions_n3.gmldistribution.txt.csv
