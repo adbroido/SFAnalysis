@@ -54,7 +54,7 @@ else:
 for i in range(loop_batches):
     minscripts = i*batch_size
     maxscripts = (i+1)*batch_size-1
-    filename = "%s_%d_of_%d" %(query, i, tot_batches)
+    filename = "%s_%d_of_%d" %(query, i+1, tot_batches)
     writelaunch(minscripts,maxscripts, filename)
 
 if loop_batches < tot_batches:
