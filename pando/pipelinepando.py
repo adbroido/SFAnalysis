@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0, '/Users/anbr3575/LRTanalysis/analysis/')
+sys.path.insert(0, '/Users/anbr3575/LRTAnalysis/analysis/')
 import numpy as np
 import pandas as pd
 import fit
