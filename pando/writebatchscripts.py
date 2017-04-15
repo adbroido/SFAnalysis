@@ -9,7 +9,7 @@ exe_pattern = 'python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py %s %s\n
 
 analysis = pd.read_pickle('/Users/anbr3575/LRTanalysis/analysis/analysis.p')
 subanalysis = analysis.query('Graph_order<4')
-queryinfo = 'order23'
+query = 'order23'
 degseqdp = '/Users/anbr3575/LRTAnalysis/degreesequences/'
 # degseqV = glob.glob(degseqdp+'*.txt')
 degseqV = [degseqdp+fn for fn in list(subanalysis.index)]
@@ -18,7 +18,7 @@ for i, fp in enumerate(degseqV):
     output = open(script_dir + str(i) + '.sh', 'w')
     output.write('#!/bin/bash\n')
     fn = fp.split('/')[-1]
-    output_file = output_pattern %(fn+queryinfo)
+    output_file = output_pattern %(fn+query)
     output.write(exe_pattern %(input_file, output_file))
     output.close()
 """
@@ -43,7 +43,6 @@ def writelaunch(minscripts, maxscripts, filename):
     output.write(launch)
     output.close()
 
-query = '23'
 num_scripts = len(glob.glob(script_dir+'*.sh')) - len(glob.glob(script_dir+'launch%s*' %(query)))
 batch_size = 1000
 loop_batches = num_scripts/batch_size
