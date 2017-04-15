@@ -7,7 +7,7 @@ script_dir = '/Users/anbr3575/LRTAnalysis/pando/scripts/'
 output_pattern = '/Users/anbr3575/LRTAnalysis/output/%s.csv'
 exe_pattern = 'python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py %s %s\n' #exe = execute
 
-analysis = pd.read_pickle('/Users/anbr3575/LRTanalysis/analysis/analysis.p')
+analysis = pd.read_pickle('/Users/anbr3575/LRTAnalysis/analysis/analysis.p')
 subanalysis = analysis.query('Graph_order<4')
 query = 'order23'
 degseqdp = '/Users/anbr3575/LRTAnalysis/degreesequences/'
