@@ -2,5 +2,7 @@
 *.pdf
 *.gml
 *.pkl
+*.o*
+*.sh
 oldorplay/
-
+output/
