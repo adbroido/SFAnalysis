@@ -14,4 +14,4 @@ for fp in outputfiles:
     new = pd.read_csv(fp, index_col=0)
     df.loc[new.index[0],list(new.columns)] = list(new.values[0])
 
-df = to_pickle('/Users/anbr3575/LRTAnalysis/analysis/analysis.p')
+df.to_pickle('/Users/anbr3575/LRTAnalysis/analysis/analysis.p')
