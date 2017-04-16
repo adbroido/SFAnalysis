@@ -1,2 +1,2 @@
 #!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefull_largestcompdistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefull_largestcompdistribution.txt.csv
+python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Freshwater_stream_webs_SuttonSp_Biological_Food_web_n3.gml_directedindistribution.txt /Users/anbr3575/LRTAnalysis/output/Freshwater_stream_webs_SuttonSp_Biological_Food_web_n3.gml_directedindistribution.txtorder4.csv

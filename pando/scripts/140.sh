@@ -1,2 +1,2 @@
 #!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/US_Congress_roll-call_votes_1789-2009_Rollcall_US_House_38_Social_Political_n3.gml_weighted3distribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/US_Congress_roll-call_votes_1789-2009_Rollcall_US_House_38_Social_Political_n3.gml_weighted3distribution.txt.csv
+python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Freshwater_stream_webs_Martins_Biological_Food_web_n3.gml_directedindistribution.txt /Users/anbr3575/LRTAnalysis/output/Freshwater_stream_webs_Martins_Biological_Food_web_n3.gml_directedindistribution.txtorder4.csv

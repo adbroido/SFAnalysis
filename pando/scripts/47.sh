@@ -1,2 +1,2 @@
 #!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Ito_core_yeast_interactome_2001_Ito-core_Biological_Protein_interactions_n3.gmldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Ito_core_yeast_interactome_2001_Ito-core_Biological_Protein_interactions_n3.gmldistribution.txt.csv
+python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Freshwater_stream_webs_Blackrock_Biological_Food_web_n3.gml_directedtotaldistribution.txt /Users/anbr3575/LRTAnalysis/output/Freshwater_stream_webs_Blackrock_Biological_Food_web_n3.gml_directedtotaldistribution.txtorder4.csv

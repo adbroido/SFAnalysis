@@ -1,2 +1,2 @@
 #!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Software_function-callgraphs_2002_VTK_v4_0_Technological_Software_n3.gml_directedtotaldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Software_function-callgraphs_2002_VTK_v4_0_Technological_Software_n3.gml_directedtotaldistribution.txt.csv
+python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Freshwater_stream_webs_Blackrock_Biological_Food_web_n3.gml_directedindistribution.txt /Users/anbr3575/LRTAnalysis/output/Freshwater_stream_webs_Blackrock_Biological_Food_web_n3.gml_directedindistribution.txtorder4.csv
