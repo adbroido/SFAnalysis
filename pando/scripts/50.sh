@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/World_subways_2009_Paris-2009_Transportation_Subway_n3.gml_multigraphsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/World_subways_2009_Paris-2009_Transportation_Subway_n3.gml_multigraphsimplifieddistribution.txtorder4.csv

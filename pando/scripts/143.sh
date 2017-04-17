@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Vazquez_Simberloff_plant-pollinator_webs_Quetrihue_c_Biological_Food_web_n3.gml_bipartitea_weightedsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/Vazquez_Simberloff_plant-pollinator_webs_Quetrihue_c_Biological_Food_web_n3.gml_bipartitea_weightedsimplifieddistribution.txtorder4.csv

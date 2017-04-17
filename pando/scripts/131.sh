@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Fungal_growth_networks_Pp_M_Tokyo_U_N_26h_9_Biological_Tissue_n3.gml_multiplexpathscore_multigraphsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/Fungal_growth_networks_Pp_M_Tokyo_U_N_26h_9_Biological_Tissue_n3.gml_multiplexpathscore_multigraphsimplifieddistribution.txtorder4.csv

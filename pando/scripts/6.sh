@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefulldistribution.txt /Users/anbr3575/LRTAnalysis/output/Arroyo_plant-pollinator_web_Elevation_1_Biological_Food_web_n3.gml_bipartitefulldistribution.txtorder4.csv

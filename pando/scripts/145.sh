@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Zachary_Karate_Club_Zachary_karate_club_77_Social_Offline_n2.gml_multigraphsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/Zachary_Karate_Club_Zachary_karate_club_77_Social_Offline_n2.gml_multigraphsimplifieddistribution.txtorder4.csv

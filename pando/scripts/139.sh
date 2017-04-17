@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/C_elegans_interactomes_2009_Genetic_Biological_Protein_interactions_n3.gml_largestcompdistribution.txt /Users/anbr3575/LRTAnalysis/output/C_elegans_interactomes_2009_Genetic_Biological_Protein_interactions_n3.gml_largestcompdistribution.txtorder4.csv

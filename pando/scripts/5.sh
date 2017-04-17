@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/ISCAS89_Benchmark_Circuits__s838_1_bench_Technological_Digital_Circuit_n3.gml_directedtotaldistribution.txt /Users/anbr3575/LRTAnalysis/output/ISCAS89_Benchmark_Circuits__s838_1_bench_Technological_Digital_Circuit_n3.gml_directedtotaldistribution.txtorder4.csv

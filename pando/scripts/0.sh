@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Small_plant-pollinator_web_Small_plant-pollinator_web_Biological_Food_web_n2.gml_bipartitefull_weightedsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/Small_plant-pollinator_web_Small_plant-pollinator_web_Biological_Food_web_n2.gml_bipartitefull_weightedsimplifieddistribution.txtorder4.csv

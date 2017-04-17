@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Metabolic_networks_from_KEGG_2006_mge_Biological_Metabolic_n3.gml_multigraphsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/Metabolic_networks_from_KEGG_2006_mge_Biological_Metabolic_n3.gml_multigraphsimplifieddistribution.txtorder4.csv

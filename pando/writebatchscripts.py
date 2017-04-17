@@ -8,8 +8,8 @@ output_pattern = '/Users/anbr3575/LRTAnalysis/output/%s.csv'
 exe_pattern = 'python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py %s %s\n' #exe = execute
 
 analysis = pd.read_pickle('/Users/anbr3575/LRTAnalysis/analysis/analysis.p')
-subanalysis = analysis.query('Graph_order<5')
-query = 'order4'
+subanalysis = analysis.query('Graph_order==5')
+query = 'order5'
 degseqdp = '/Users/anbr3575/LRTAnalysis/degreesequences/'
 # degseqV = glob.glob(degseqdp+'*.txt')
 degseqV = [degseqdp+fn for fn in list(subanalysis.index)]
@@ -39,7 +39,7 @@ def writelaunch(minscripts, maxscripts, filename):
     #PBS -l pmem=8gb
     #PBS -l nodes=1:ppn=1
 
-    /Users/anbr3575/LRTAnalysis/pando/scripts/${PBS_ARRAYID}.sh\n""" % (minscripts,maxscripts, '%20')
+    /Users/anbr3575/LRTAnalysis/pando/scripts/${PBS_ARRAYID}.sh\n""" % (minscripts,maxscripts, '%50')
     output.write(launch)
     output.close()
 

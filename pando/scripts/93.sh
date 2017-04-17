@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Route_Views_AS_graphs_1999-2000_as19990104_Technological_Communication_n3.gml_multigraphsimplifieddistribution.txt /Users/anbr3575/LRTAnalysis/output/Route_Views_AS_graphs_1999-2000_as19990104_Technological_Communication_n3.gml_multigraphsimplifieddistribution.txtorder4.csv

@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Binary_interactomes_various_species_2012_A_thaliana_mustard_binary_hq_Biological_Protein_interactions_n3.gmldistribution.txt /Users/anbr3575/LRTAnalysis/output/Binary_interactomes_various_species_2012_A_thaliana_mustard_binary_hq_Biological_Protein_interactions_n3.gmldistribution.txtorder4.csv

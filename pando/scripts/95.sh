@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/McCullen_plant-pollinator_web_McCullen_plant-pollinator_web_Biological_Food_web_n3.gml_bipartitefull_largestcompdistribution.txt /Users/anbr3575/LRTAnalysis/output/McCullen_plant-pollinator_web_McCullen_plant-pollinator_web_Biological_Food_web_n3.gml_bipartitefull_largestcompdistribution.txtorder4.csv

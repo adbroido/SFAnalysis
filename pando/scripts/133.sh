@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py /Users/anbr3575/LRTAnalysis/degreesequences/Joern_plant-herbivore_webs_Altuda_Biological_Food_web_n2.gml_bipartitefulldistribution.txt /Users/anbr3575/LRTAnalysis/output/Joern_plant-herbivore_webs_Altuda_Biological_Food_web_n2.gml_bipartitefulldistribution.txtorder4.csv
