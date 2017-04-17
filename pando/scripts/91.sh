@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/World_subways_2009_HongKong-2009_Transportation_Subway_n2.gml_multigraphsimplifieddistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/World_subways_2009_HongKong-2009_Transportation_Subway_n2.gml_multigraphsimplifieddistribution.txt.csv

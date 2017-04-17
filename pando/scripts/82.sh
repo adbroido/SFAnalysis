@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/C_elegans_neurons_1986_C_elegans_Metabolic_Biological_Connectome_n3.gml_multigraphsimplified_weightedsimplified_directedtotaldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/C_elegans_neurons_1986_C_elegans_Metabolic_Biological_Connectome_n3.gml_multigraphsimplified_weightedsimplified_directedtotaldistribution.txt.csv

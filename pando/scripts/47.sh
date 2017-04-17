@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Ito_core_yeast_interactome_2001_Ito-core_Biological_Protein_interactions_n3.gmldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Ito_core_yeast_interactome_2001_Ito-core_Biological_Protein_interactions_n3.gmldistribution.txt.csv

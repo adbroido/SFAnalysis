@@ -1,0 +1,3 @@
+xvalue,counts
+2,17
+34,1

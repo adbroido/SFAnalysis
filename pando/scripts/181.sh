@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Political_books_network_2004_Krebs_political_books_Informational_Recommendations_n3.gmldistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Political_books_network_2004_Krebs_political_books_Informational_Recommendations_n3.gmldistribution.txt.csv

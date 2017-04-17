@@ -1,2 +1,0 @@
-#!/bin/bash
-python /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/pipeline.py -i /Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/Binary_interactomes_various_species_2012_A_thaliana_mustard_binary_hq_Biological_Protein_interactions_n3.gml_largestcompdistribution.txt -o /Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/output/Binary_interactomes_various_species_2012_A_thaliana_mustard_binary_hq_Biological_Protein_interactions_n3.gml_largestcompdistribution.txt.csv
