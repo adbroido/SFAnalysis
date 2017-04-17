@@ -314,16 +314,16 @@ def processgraphs(catalog, degdir, analysis, overwrite=False):
 if __name__ == '__main__':
     # where to store deg seqs
     degdir = '/Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/'
-    catalog = pd.read_pickle('gmlcatalog.p')
+    catalog = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/gmlcatalog.p')
     # analysis = pd.DataFrame(columns=['Domain', 'Subdomain', 'num_edges',
     #                                  'Graph_order', 'Weighted', 'Directed',
     #                                  'Bipartite', 'Multigraph', 'Multiplex',
     #                                  'Component', 'fp_gml', 'n', 'alpha',
     #                                  'xmin', 'ntail', 'Lpl', 'ppl', 'dexp',
     #                                  'dln', 'dstrexp', 'dplwc'])
-    analysis = pd.read_pickle('analysis.p')
+    analysis = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
     # trim catalog to relevant entries
-    catalog = catalog.query('Graph_order > 4 & Graph_order < 6')
+    catalog = catalog.query('Graph_order > 5 & Graph_order < 7')
     #fp = '/Volumes/Durodon/gmls/Biological/Food_web/n2/Aishihik_Lake_host-parasite_web_Aishihik_Lake_host-parasite_web_Biological_Food_web_n2.gml'
     processgraphs(catalog,degdir,analysis, overwrite=True)
-    analysis.to_pickle('analysis.p')
+    analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/subanalysis_6.p')
