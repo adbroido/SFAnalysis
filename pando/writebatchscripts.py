@@ -32,7 +32,7 @@ def writelaunch(minscripts, maxscripts, filename):
     output = open(script_dir + 'launch%s.sh' %(filename), 'w')
     launch = \
     """#!/bin/bash
-    #PBS -N pandotest
+    #PBS -N lrtanalysis%s
     #PBS -joe
     #PBS -t %d-%d%s
     #PBS -q long8gb
