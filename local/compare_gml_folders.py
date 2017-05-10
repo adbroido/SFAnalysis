@@ -22,3 +22,26 @@ def listgmls(gmldirpath):
             if name.endswith('.gml') and '1mode' not in name:
                 fpV.append(os.path.join(root, name))
     return fpV
+
+def gmlnames(gml_fpV):
+    fnV = []
+    for fp in gml_fpV:
+        fnV.append(fp.split('/')[-1])
+    return fnV
+
+
+squal_fp = '/Volumes/Durodon/squalodon_gmls/'
+clean_fp = '/Volumes/Durodon/clean_gmls/'
+dur_fp = '/Volumes/Durodon/durodon_gmls/'
+avoiddirs = []
+
+squal_gmls = listgmls(squal_fp)
+dur_gmls = listgmls(dur_fp)
+clean_gmls = listgmls(clean_fp)
+
+squal_gml_names = gmlnames(squal_gmls)
+dur_gml_names = gmlnames(dur_gmls)
+clean_gml_names = gmlnames(clean_gmls)
+
+# find files that are in durodon but not in squal
+set(dur_gml_names).difference(clean_gml_names)

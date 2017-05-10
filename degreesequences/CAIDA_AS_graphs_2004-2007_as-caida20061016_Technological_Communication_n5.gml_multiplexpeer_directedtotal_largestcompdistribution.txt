@@ -1,3 +1,0 @@
-xvalue,counts
-2,15
-30,1
