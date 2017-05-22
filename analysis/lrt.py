@@ -14,14 +14,11 @@ def vuong(LplV, LaltV):
     logratioV = LplV - LaltV
     n = len(logratioV)
     R = np.sum(logratioV)
-    # mean of normal dist
-    mu = np.mean(logratioV)
     # standard deviation of normal dist
     sigma = np.std(logratioV)
     normR = (1/np.sqrt(n))*R/sigma
-    vuongstat = np.sqrt(n)*mu/sigma
     # one-sided p-value
-    p1 = norm.cdf(vuongstat)
+    p1 = norm.cdf(normR)
     if p1 > 0.5:
         p1 = 1-p1
     # 2-sided p-value
