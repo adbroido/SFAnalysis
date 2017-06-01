@@ -8,8 +8,8 @@ output_pattern = '/Users/anbr3575/LRTAnalysis/output/%s.csv'
 exe_pattern = 'python /Users/anbr3575/LRTAnalysis/pando/pipelinepando.py %s %s\n' #exe = execute
 
 analysis = pd.read_pickle('/Users/anbr3575/LRTAnalysis/analysis/analysis.p')
-subanalysis = analysis.query('Graph_order==5')
-query = 'order5'
+subanalysis = analysis.query('Graph_order==6')
+query = 'order6'
 degseqdp = '/Users/anbr3575/LRTAnalysis/degreesequences/'
 # degseqV = glob.glob(degseqdp+'*.txt')
 degseqV = [degseqdp+fn for fn in list(subanalysis.index)]
