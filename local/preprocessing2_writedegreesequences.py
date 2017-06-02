@@ -323,7 +323,7 @@ if __name__ == '__main__':
     #                                  'dln', 'dstrexp', 'dplwc'])
     analysis = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
     # trim catalog to relevant entries
-    catalog = catalog.query('Graph_order > 5 & Graph_order < 7')
+    catalog = catalog.query('Graph_order ==6')
     #fp = '/Volumes/Durodon/gmls/Biological/Food_web/n2/Aishihik_Lake_host-parasite_web_Aishihik_Lake_host-parasite_web_Biological_Food_web_n2.gml'
-    processgraphs(catalog,degdir,analysis, overwrite=True)
+    processgraphs(catalog,degdir,analysis, overwrite=False)
     analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/subanalysis_6.p')
