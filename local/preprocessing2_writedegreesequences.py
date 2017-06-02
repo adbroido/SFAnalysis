@@ -326,4 +326,4 @@ if __name__ == '__main__':
     catalog = catalog.query('Graph_order ==6')
     #fp = '/Volumes/Durodon/gmls/Biological/Food_web/n2/Aishihik_Lake_host-parasite_web_Aishihik_Lake_host-parasite_web_Biological_Food_web_n2.gml'
     processgraphs(catalog,degdir,analysis, overwrite=False)
-    analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/subanalysis_6.p')
+    analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
