@@ -32,18 +32,18 @@ def writelaunch(minscripts, maxscripts, filename):
     output = open(script_dir + 'launch%s.sh' %(filename), 'w')
     launch = \
     """#!/bin/bash
-    #PBS -N lrtanalysis%s
+    #PBS -N lrtanalysis_%s
     #PBS -joe
     #PBS -t %d-%d%s
     #PBS -q long8gb
     #PBS -l pmem=8gb
     #PBS -l nodes=1:ppn=1
 
-    /Users/anbr3575/LRTAnalysis/pando/scripts/${PBS_ARRAYID}.sh\n""" % (minscripts,maxscripts, '%50')
+    /Users/anbr3575/LRTAnalysis/pando/scripts/${PBS_ARRAYID}.sh\n""" % (filename, minscripts,maxscripts, '%50')
     output.write(launch)
     output.close()
 
-num_scripts = len(glob.glob(script_dir+'*.sh')) - len(glob.glob(script_dir+'launch%s*' %(query)))
+num_scripts = len(glob.glob(script_dir+'*.sh')) - len(glob.glob(script_dir+'launch*' ))
 batch_size = 1000
 loop_batches = num_scripts/batch_size
 if num_scripts == batch_size*loop_batches:
