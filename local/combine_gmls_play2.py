@@ -3,9 +3,9 @@ import glob
 import igraph
 import numpy as np
 
-root_directory = "/Users/annabroido/CU/testgmls/Social/Political/"
-text_to_match = "*enate"
-splitkey = "Senate"
+root_directory = "/Volumes/Durodon/gmls/Technological/Communication/"
+text_to_match = "Route_Views_AS*1997-1998*"
+splitkey = "1997-1998"
 
 paths = []
 for nodedir in ["n1", "n2", "n3", "n4", "n5", "n6", "n7", "n8"]:
@@ -17,10 +17,37 @@ for nodedir in ["n1", "n2", "n3", "n4", "n5", "n6", "n7", "n8"]:
             order = nodedir
 
 full_g = igraph.read(paths[0])
-partial_g = igraph.read(paths[1])
+snap = paths[0].split('/')[-1].split(splitkey)[1].split('_')[1]
+full_g.es['snap'] = snap
+
+partial_ind = 1
+partial_g = igraph.read(paths[partial_ind])
 
 full_nodes = [node.attributes() for node in full_g.vs]
 partial_nodes = [node.attributes() for node in partial_g.vs]
 
+#find new nodes
 import itertools
 new_nodes = list(itertools.ifilterfalse(lambda x: x in full_nodes, partial_nodes))
+
+# add new nodes to full_g
+for node in new_nodes:
+    new_node_ind = len(full_g.vs)
+    full_g.add_vertices(1)
+    full_g.vs[new_node_ind]['id'] = node['id']
+full_nodes = [node.attributes() for node in full_g.vs]
+
+# get snapshot id
+snap = paths[partial_ind].split('/')[-1].split(splitkey)[1].split('_')[1]
+
+# add edges
+partial_g.es['snap'] = snap
+start = full_g.ecount()
+attrnames = full_g.es.attributes()
+for edge_ind, edge  in enumerate(partial_g.es()):
+    (local_source, local_target) = edge.tuple
+    full_source = full_nodes.index(partial_nodes[local_source])
+    full_target = full_nodes.index(partial_nodes[local_target])
+    full_g.add_edges([(full_source,full_target)])
+    for att in attrnames:
+        full_g.es[start+edge_ind][att] = edge[att]
