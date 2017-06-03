@@ -2,6 +2,7 @@ import os
 import glob
 import igraph
 import numpy as np
+import itertools
 
 root_directory = "/Users/anbr3575/LRTAnalysis/gmls/Technological/Communication/"
 text_to_match = "Route_Views_AS*1997-1998*"
@@ -20,7 +21,7 @@ full_g = igraph.read(paths[0])
 snap = paths[0].split('/')[-1].split(splitkey)[1].split('_')[1]
 full_g.es['snap'] = snap
 
-for partial_ind in range(len(paths)):
+for partial_ind in range(1,len(paths)):
     print partial_ind
     partial_g = igraph.read(paths[partial_ind])
 
@@ -28,7 +29,6 @@ for partial_ind in range(len(paths)):
     partial_nodes = [node.attributes() for node in partial_g.vs]
 
     #find new nodes
-    import itertools
     new_nodes = list(itertools.ifilterfalse(lambda x: x in full_nodes, partial_nodes))
 
     # add new nodes to full_g
@@ -52,3 +52,12 @@ for partial_ind in range(len(paths)):
         full_g.add_edges([(full_source,full_target)])
         for att in attrnames:
             full_g.es[start+edge_ind][att] = edge[att]
+
+# # write to gml file
+fnsplit = fn.split("_" + snap + "_")
+orderofmag = int(np.ceil(np.log10(full_g.vcount())))
+order = "n%s" %orderofmag
+out_gml_title = "/Users/anbr3575/" + fnsplit[0] + "_Union_" + fnsplit[1].split(".")[0][:-2] + order + ".gml"
+print out_gml_title
+comment = "Union of the " + fnsplit[0][:-1] + " files."
+full_g.write_gml(out_gml_title, comment)

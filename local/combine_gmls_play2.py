@@ -51,3 +51,10 @@ for edge_ind, edge  in enumerate(partial_g.es()):
     full_g.add_edges([(full_source,full_target)])
     for att in attrnames:
         full_g.es[start+edge_ind][att] = edge[att]
+
+# # write to gml file
+# fnsplit = fn.split("_" + snap + "_")
+# out_gml_title = root_directory + order + "/" + fnsplit[0] + "_Union_" + fnsplit[1].split(".")[0][:-2] + order + ".gml"
+# print out_gml_title
+# comment = "Union of the " + fnsplit[0][:-1] + " files."
+# g.write_gml(out_gml_title, comment)
