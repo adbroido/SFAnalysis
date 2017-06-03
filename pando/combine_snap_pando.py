@@ -3,7 +3,7 @@ import glob
 import igraph
 import numpy as np
 
-root_directory = "/Users/anbr3575/LRTAnalysis/gmls/Technological/Communication"
+root_directory = "/Users/anbr3575/LRTAnalysis/gmls/Technological/Communication/"
 text_to_match = "Route_Views_AS*1997-1998*"
 splitkey = "1997-1998"
 
