@@ -5,8 +5,8 @@ import numpy as np
 import itertools
 
 root_directory = "/Users/anbr3575/LRTAnalysis/gmls/Technological/Communication/"
-text_to_match = "Route_Views_AS*1999-2000*"
-splitkey = "1999-2000"
+text_to_match = "Route_Views_AS*1997-1998*"
+splitkey = "1997-1998"
 
 paths = []
 for nodedir in ["n1", "n2", "n3", "n4", "n5", "n6", "n7", "n8"]:
