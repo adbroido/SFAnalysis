@@ -39,7 +39,7 @@ def runanalysis(fp):
     # pull out the name for reference
     splitstr = fp.split('/')
     fn = splitstr[-1]
-    analysis = pd.DataFrame(columns=['alpha', 'xmin', 'ntail', 'Lpl', 'ppl',
+    analysis = pd.DataFrame(columns=['n', 'alpha', 'xmin', 'ntail', 'Lpl', 'ppl',
                                      'dexp', 'dln', 'dstrexp', 'dplwc'],
                                      index=[fn])
     # note if there is a problem with the file
