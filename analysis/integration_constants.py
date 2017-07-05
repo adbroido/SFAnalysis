@@ -1,6 +1,17 @@
 import mpmath as mp
 import numpy as np
 
+""" Contains functions to compute the normalization constants for both power-law
+and power-law with expoenential cutoff. Both functions are meant to be called
+directly.
+
+Note that plwcconstant returns a constant to divide by, while plconst returns
+a constant to multiply.
+
+"""
+
+
+
 def plwcconst(alpha, lam, xmin):
     """ Computes the normalization constant on the discrete power law;
     i.e., computes C so that
@@ -35,8 +46,6 @@ def plwcconst(alpha, lam, xmin):
     """
     mp.mp.dps = 40
     result = mp.exp(-xmin * lam) * mp.lerchphi(mp.exp(-lam), alpha, xmin)
-    #convert from sympy's mpf type to a float
-    # C = 1./float(result)
     C = float(result)
     return C
 
@@ -72,15 +81,9 @@ def plconst(alpha, xmin):
         C                      float, normalization constant
 
     """
-	#zeta_vec = np.frompyfunc(mp.zeta, 2, 1)
-	# convert from mpmath function to
-    # numpy array. Indicates that zeta
- 	# takes 2 inputs and gives 1 output
-   	# result = zeta_vec(alpha, xmin)
     total = mp.zeta(np.asscalar(alpha),1) # op.minimize passes array
     lowertail = np.sum(np.asarray(range(1,xmin)**(-alpha)))
     result = total-lowertail
-    #convert from sympy's mpf type to a float
     C = 1./(result)
     return float(C)
 
@@ -92,5 +95,5 @@ if __name__ == '__main__':
     lam = 2.0
     xmin = 3
 
-    const1 = discplwc_constant(alpha, lam, xmin)
-    const2 = discpl_constant(alpha, xmin)
+    const1 = plwcconst(alpha, lam, xmin)
+    const2 = plconst(alpha, xmin)

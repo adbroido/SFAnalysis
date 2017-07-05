@@ -4,10 +4,19 @@ import integration_constants as ic
 import scipy.special as sp
 import time
 
+""" Contains functions used in fitting the power-law, exponential, log-normal,
+Weibull (stretched exponential), and power-law with exponential cutoff, as well
+as plpval() to find a p-value for the power-law fit. All should be called
+directly. All distributions are discrete.
+
+"""
+
 
 def pl(x):
-    """ Fits a tail-conditional power-law to a data set. This implements
-    brute force optimization instead of using a built in optimizer.
+    """ Fits a tail-conditional power-law to a data set. This implements brute
+    force optimization (grid search) instead of using a built in optimizer. The
+    grid on alpha runs from alstart to alstart+shift. This is based on Aaron's
+    plfit.m Matlab code (http://tuvalu.santafe.edu/~aaronc/powerlaws/).
 
     Input:
         x           ndarray, ndim = 1, dtype = integer
@@ -16,10 +25,11 @@ def pl(x):
     Output:
         alpha        float, exponent on x, must be > 1
         xmin         int, starting point for power law tail, must be >= 1
+        ntail        int, number of datapoints above (and including) xmin
         L            float, log likelihood of the returned fit
         ks           float, goodness of fit statistic (Kolmogorov-Smirnov)
     """
-    # find the unique possible xmin values
+    # find the and sort unique possible xmin values
     xminV = np.trim_zeros(np.unique(x))
     # initialize array of the fits for every xmin
     fitV = np.zeros([len(xminV),2])
@@ -91,14 +101,14 @@ def pl(x):
     return [alpha,xmin, ntail, L, ks]
 
 def plpval(x, alpha, xmin, gof):
-    """ Fits a tail-conditional exponential to a data set. This implements
-    brute force optimization instead of using a built in optimizer.
+    """ Finds p-value for the power-law fit using a KS test. This is based on
+    Aaron's plpva.m Matlab code (http://tuvalu.santafe.edu/~aaronc/powerlaws/).
 
     Input:
-        x           ndarray, ndim = 1, dtype = integer
+        x            ndarray, ndim = 1, dtype = integer
         alpha        float, exponent on x, must be > 1
         xmin         int, starting point for power law tail, must be >= 1
-        ks           float, goodness of fit statistic (Kolmogorov-Smirnov)
+        gof           float, goodness of fit statistic (Kolmogorov-Smirnov)
 
 
     Output:
@@ -177,11 +187,12 @@ def exp(x):
     more relevant for likelihood calculations.
 
     Input:
-        x           ndarray, ndim = 1, dtype = integer
+        x            ndarray, ndim = 1, dtype = integer
 
     Output:
         lam          float, exponential rate, must be > 0
         LV           ndarray, pointwise log likelihood of the returned fit
+        convstatus   Boolean, True if the fit converged, false if not
     """
     xmin = np.min(x)
     ntail = len(x)
@@ -204,15 +215,18 @@ def ln(x):
     """ Fits a tail-conditional log normal distribution to a data set.
     The data is assumed to begin at xmin. The logpdf is what is calculated and
     returned, as this is more relevant for likelihood calculations.
-    Discretization is done by binning the continuous distrbution (see text for details)
+    Discretization is done by binning the continuous distrbution
+    (see text for details)
 
     Input:
-        x           ndarray, ndim = 1, dtype = integer
+        x               ndarray, ndim = 1, dtype = integer
 
     Output:
-        mu          float, mean of distribution, unbounded (though we impose a bound)
-        sigma       float, standard deviation, must be > 0
-        LV          ndarray, pointwise log likelihood of the returned fit
+        theta           ndarray, [mu, sigma] where mu is a float, the mean of the
+                            distribution, unbounded (though we impose a bound), and sigma is a
+                            float, the standard deviation, and must be > 0
+        LV              ndarray, pointwise log likelihood of the returned fit
+        convstatus      Boolean, True if the fit converged, false if not
     """
     xmin = np.min(x)
     ntail = len(x)
@@ -251,6 +265,7 @@ def plwc(x, alpha0=None):
         alpha        float, exponent on x, must be > -1
         lam          float, exponential rate, must be > 0
         LV           ndarray, pointwise log likelihood of the returned fit
+        convstatus   Boolean, True if the fit converged, false if not
     """
     xmin = np.min(x)
     ntail = len(x)
@@ -282,15 +297,17 @@ def strexp(x):
     """ Fits a tail-conditional stretched exponential distribution to a data set.
     The data is assumed to begin at xmin. The logpdf is what is calculated and
     returned, as this is more relevant for likelihood calculations.
-    Discretization is done by binning the continuous distrbution (see text for details)
+    Discretization is done by binning the continuous distrbution
+    (see text for details)
 
     Input:
         x           ndarray, ndim = 1, dtype = integer
 
     Output:
-        a           float, mean of distribution, unbounded (though we impose a bound??)
-        b           float, standard deviation, must be > 0
-        LV          ndarray, pointwise log likelihood of the returned fit
+        theta           ndarray, [a,b], dtype=float. a (0<a<1) is the mean of the
+                            distribution and b is the standard deviation (b > 0)
+        LV              ndarray, pointwise log likelihood of the returned fit
+        convstatus      Boolean, True if the fit converged, false if not
     """
     xmin = np.min(x)
     ntail = len(x)
@@ -299,7 +316,8 @@ def strexp(x):
         """
         The follow is not an efficient estimator of the shape, but serves to start
         the approximation process off.  (See Johnson and Katz, ch. 20, section 6.3,
-        "Estimators Based on Distribution of log X".)
+        "Estimators Based on Distribution of log X".) This is taken from the R
+        package by Cosma Shalizi at http://tuvalu.santafe.edu/~aaronc/powerlaws/).
         """
         xmin = np.min(x)
         n = len(x)

@@ -5,18 +5,26 @@ import pandas as pd
 import sortgmls as sg
 import collections
 
-import traceback
-import warnings
-import sys
+"""
+The functions here are designed to take cataloged gml files, extract
+corresponding simple degree sequences, and store basic information about each
+new simple graph and what path created it. The function processgraphs() is the
+only one intended to be called directly. It requires as input a catalog of gmls
+with file paths, and structural information (directed, weighted, multiplex,
+multigraph, bipartite).
+"""
 
-def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
-    traceback.print_stack()
-    log = file if hasattr(file,'write') else sys.stderr
-    log.write(warnings.formatwarning(message, category, filename, lineno, line))
-
-warnings.showwarning = warn_with_traceback
 
 def writeerror(errormessage, size):
+    """ Write to error files for degree sequences whose mean is either too big
+    or too small to be considered.
+
+    Input:
+        errormessage            string, gets written as a single line in the
+                                error file.
+        size                    string, either 'small' or 'big'. Designates
+                                which error file to write to.
+    """
     if size=='small':
         errorfp = 'degseqerror_small.txt'
     elif size=='big':
@@ -31,21 +39,38 @@ def writeerror(errormessage, size):
         f.write(errormessage)
     f.close()
 
-def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mgkey=0, mpkey=0, compkey='entire'):
+def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mgkey=0, mpkey=0, compkey):
     """ Reads in an igraph object and writes the degree sequence to a text file.
-    Assumes that g has been processed already and is not weighted, multiplex,
-    bipartite, or directed.
+    Assumes that g has been processed already and is simple or directed only.
+    A new row with basic information about the graph is added to analysis.
 
     Input:
-        g                       igraph object, represents one network
+        g                       igraph object, represents one graph
         fp                      path to GML file where a version of g lives
         degdir                  directory, where to store the degree sequences
-        direction               in or out, indicates whether to take in or out degree
+        analysis                DataFrame, table of results indexed by degree seq
+        namekey                 string, gets added to the degree sequence
+                                filename to indicate the path that created the
+                                sequence from the original network
+        bipkey                  int or string, indicates type of bipartite
+                                splitting. 0 for not bipartite.
+        weighkey                int or string, indicates weighting threshold or
+                                simplification algorithm. 0 for not weighted.
+        dirkey                  int or string, indicates direction of edges for
+                                splitting. 0 for not directed.
+        mgkey                   int or string, indicates simplified from
+                                multigraph 0 for not multigraph.
+        mpkey                   int or string, indicates edge type that generated
+                                this subgraph. 0 for not weighted.
+        compkey                 string, indicates weighting threshold or
+                                simplification algorithm. 0 for not weighted.
+
 
     Output:
         degfile                 output is written to a text file, not returned
 
     """
+    # split by degree
     if dirkey == 0 or dirkey == 'total':
         deg = g.degree()
     elif dirkey == 'in':
@@ -62,20 +87,22 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
     gmlname = splitfp[-1]
     fn = gmlname+namekey + 'distribution.txt'
     # check if degree sequence is too dense and don't write to file if so
-    if np.mean(deg) > np.sqrt(len(deg)):
+    meandeg = np.mean(deg)
+    if meandeg> np.sqrt(len(deg)):
         errormessage = "%s is too dense \n" %fn
         writeerror(errormessage, 'big')
     # check if mean degree is too small and don't write to file if so
-    elif np.mean(deg) < 2:
+    elif meandeg < 2:
         errormessage = "%s mean degree is too small \n" %fn
         writeerror(errormessage, 'small')
     else:
+        # write degree sequence file. Each row is xvalue,count
         count_dict = sorted(collections.Counter(deg).items())
         numedges = g.ecount()
         df = pd.DataFrame(count_dict, columns = ['xvalue', 'counts'])
         csvfile = degdir+fn
         df.to_csv(csvfile, index=False)
-        # add new line if not already in index
+        # add new line to the data frame if not already in index
         if fn not in analysis.index:
             analysis.loc[fn] = ''
         analysis.loc[fn]['Domain'] = domain
@@ -83,6 +110,7 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
         analysis.loc[fn]['fp_gml'] = fp
         analysis.loc[fn]['Graph_order'] = gsize
         analysis.loc[fn]['num_edges'] = numedges
+        analysis.loc[fn]['meandeg'] = meandeg
         analysis.loc[fn]['Weighted'] = weighkey
         analysis.loc[fn]['Directed'] = dirkey
         analysis.loc[fn]['Bipartite'] = bipkey
@@ -91,6 +119,10 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
         analysis.loc[fn]['Component'] = compkey
 
 def checkconnected(g,fp,degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mpkey=0, mgkey=0):
+    """ Checks if a graph is connected. If not, pull out 2 degree sequences:
+    entire graph and jsut the largest component.
+
+    """
     # if g is not connected, pull out the largest component
     if g.is_connected():
         compkey = 'connected'
@@ -105,19 +137,46 @@ def checkconnected(g,fp,degdir, analysis, namekey='', bipkey=0, weighkey=0, dirk
         readdeg(largecomp,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
 
 def processdirected(g, fp, degdir, analysis,  namekey='', bipkey=0, mpkey=0, weighkey=0, mgkey=0):
+    """ Processes a directed graph. The graph is split into three: in-degree,
+    out-degree, and total degree.
+
+    """
     keyV = [('in', '_directedin'), ('out','_directedout'), ('total', '_directedtotal')]
     for dirkey, dirnamekey in keyV:
         newnamekey = namekey+dirnamekey
         checkconnected(g,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mgkey=0, mpkey=mpkey)
 
 def find_threshold(weights, target_num_edges, left=0):
+    """ Given a target number of edges in a new subgraph and a list of current
+    edge weights, finds the threshold needed to achieve this target edge count.
+    Uses bisection to find the threshold.
+
+    Input:
+        weights             ndarray, edge weights in the order corresponding to
+                            the order of edges
+        target_num_edges    float, threshold for keeping weights. Edges with
+                            weight < thresh are discarded
+        left                int, index of smallest weight to consider. Included
+                            as an argument to speed up the search when we know
+                            weaker thresholds.
+
+    Output:
+        thresh              float, threshold weight
+        mid                 int, index of threshold weight
+
+    """
+    # ordered list of weights without duplicates
     uniqueweights = np.unique(weights)
+    # we will bin weights into unique groups
     numbins = len(uniqueweights)
     done = False
     right = numbins-1
     while not done:
+        # find midpoint
         mid = int(np.floor((left+right)/2))
+        # number of weights above the midpoint
         lenwtail = np.sum(weights>uniqueweights[mid])
+        # number of unique weights above mid
         lenutail = np.sum(uniqueweights>uniqueweights[mid])
         if lenwtail > target_num_edges:
             left = mid+ 1
@@ -129,6 +188,19 @@ def find_threshold(weights, target_num_edges, left=0):
     return thresh, mid
 
 def oneweighted(g, fp, degdir, analysis, weights, thresh, namekey, weighkey):
+    """ Processes a single weighted graph. Pulls out the list of edges with
+    weight above the minimum threshold "thresh", creates a new subgraph from
+    these edges, then checks for directedness and connectedness.
+
+    Input:
+        weights             ndarray, edge weights in the order corresponding to
+                            the order of edges
+        thresh              float, threshold for keeping weights. Edges with
+                            weight < thresh are discarded
+        weighkey            string, indicates which thresholding algorithm was
+                            used
+
+    """
     edgeseq = g.es(weight_gt=thresh)
     subg = g.subgraph_edges(edgeseq)
     if subg.is_directed():
@@ -137,6 +209,11 @@ def oneweighted(g, fp, degdir, analysis, weights, thresh, namekey, weighkey):
         checkconnected(subg,fp,degdir,analysis, namekey=namekey,weighkey=weighkey)
 
 def processweighted(g, fp, degdir, analysis):
+    """ Processes a weighted graph. This is only for graphs that are not
+    multigraph, bipartite, or multiplex. The graph is split into three by
+    thresholding on weight in different ways.
+
+    """
     if not g.is_weighted():
         g.es['weight'] = g.es['value']
     weights = np.asarray(g.es['weight'])
@@ -168,6 +245,10 @@ def processweighted(g, fp, degdir, analysis):
         oneweighted(g, fp, degdir, analysis, weights,thresh3, namekey, weighkey)
 
 def processmultigraph(g, fp, degdir, analysis, namekey='', mpkey=0, bipkey=0):
+    """ Processes a multigraph or weighted graph by ignoring multiedges and
+    weights, then sends the simplified graph on.
+
+    """
     mgkey=0
     weighkey=0
     if sg.multigraph(g)==1:
@@ -185,6 +266,14 @@ def processmultigraph(g, fp, degdir, analysis, namekey='', mpkey=0, bipkey=0):
 
 
 def onebipartite(g,fp,degdir, analysis, namekey,mpkey, bipkey):
+    """ Processes a single bipartite projection, sending it to the next step in
+    the hierarchy towards writing degree seqeunces.
+
+    Input:
+        bipkey                  string, indicates the projection (a or b) that
+                                generated this subgraph of the original.
+
+    """
     if sg.weighted(g, fp)==1 or sg.multigraph(g)==1:
         processmultigraph(g, fp, degdir, analysis, namekey, mpkey=0, bipkey=bipkey)
     elif g.is_directed():
@@ -194,6 +283,21 @@ def onebipartite(g,fp,degdir, analysis, namekey,mpkey, bipkey):
 
 
 def processbipartite(g, fp, degdir, analysis, namekey='', mpkey=0):
+    """ Processes a bipartite graph. Splits into three graphs: a- and b-mode
+    projections, and full graph. Sends each on along to the next step in the
+    hierarchy towards writing degree seqeunces.
+
+    Input:
+        namekey                 string, gets updated at every step in the
+                                hierarchy and in the end is added to the name of
+                                the degree sequence file to keep track of what
+                                path generated each sequence
+        mpkey                   int or string, indicates the edge type that
+                                generated this subgraph of the original. 0 if
+                                the original network was not multiplex
+
+    """
+    # get node types and recast as integer types
     types = np.asarray(g.vs['type'])
     uniquetypes = np.unique(types)
     types[types==uniquetypes[0]] = 0
@@ -219,6 +323,16 @@ def processbipartite(g, fp, degdir, analysis, namekey='', mpkey=0):
     onebipartite(g,fp,degdir, analysis, namekey=newnamekey,mpkey=mpkey,bipkey=bipkey)
 
 def processmultiplex(g, fp, degdir, analysis):
+    """ Processes a multiplex graph. Splits along the edge types, so that each
+    edge type gets its own new graph. Then sends each of these new graphs
+    through the structural hierarchy and sends them along the appropriate path
+    for further processing.
+
+    Input:
+        g                     igraph Graph object, known to be multiplex
+        fp                    file path, leads to gml file
+
+    """
     # project onto layers
     # pull out list of attributes
     attributes = g.es.attributes()
@@ -285,11 +399,33 @@ def processmultiplex(g, fp, degdir, analysis):
         else:
             checkconnected(graph, fp, degdir, analysis, namekey=namekey, mpkey=mpkey)
 
-def processgraphs(catalog, degdir, analysis, overwrite=False):
+def processgraphs(catalog, degdir, overwrite=False):
+    """ Takes catalog of gml files and their structural properties(weighted,
+    directed, bipartite, multigraph, multiplex) and sets them on the path to
+    extract all relevant simple degree sequences from each.
+
+    Input:
+        catalog                     pandas DataFrame, indices are gml file names
+        degdir                      file path, where degree seqeunce files will
+                                    be stored
+        overwrite                   boolean, if false only new files will be
+                                    added to the analysis DataFrame. Otherwise
+                                    the dataframe will be recreated from scratch.
+                                    Default is False.
+
+    """
     fpV = catalog['fp_gml']
     # only add new files
     if overwrite == False:
+        analysis = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
         fpV = set(fpV).difference(set(analysis['fp_gml']))
+    else:
+        analysis = pd.DataFrame(columns=['Domain', 'Subdomain', 'num_edges',
+                                         'Graph_order', 'Weighted', u'Directed',
+                                         'Bipartite', 'Multigraph', 'Multiplex',
+                                         'Component', 'fp_gml', 'n', 'alpha',
+                                         'xmin', 'ntail', 'Lpl', 'ppl', 'dexp',
+                                         'dln', 'dstrexp', 'dplwc', 'meandeg'])
     for fp in fpV:
         g = igraph.read(fp)
         #### find what kind of graph this is (follow hierarchical ordering of types)
@@ -312,18 +448,13 @@ def processgraphs(catalog, degdir, analysis, overwrite=False):
 
 
 if __name__ == '__main__':
-    # where to store deg seqs
+    # file path to degree sequences
     degdir = '/Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/'
+    # read in gml catalog to pandas DataFrame
     catalog = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/gmlcatalog.p')
-    # analysis = pd.DataFrame(columns=['Domain', 'Subdomain', 'num_edges',
-    #                                  'Graph_order', 'Weighted', 'Directed',
-    #                                  'Bipartite', 'Multigraph', 'Multiplex',
-    #                                  'Component', 'fp_gml', 'n', 'alpha',
-    #                                  'xmin', 'ntail', 'Lpl', 'ppl', 'dexp',
-    #                                  'dln', 'dstrexp', 'dplwc'])
-    analysis = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
-    # trim catalog to relevant entries
+    # trim catalog to subset of entries. This step is optional
     catalog = catalog.query('Graph_order ==6')
-    #fp = '/Volumes/Durodon/gmls/Biological/Food_web/n2/Aishihik_Lake_host-parasite_web_Aishihik_Lake_host-parasite_web_Biological_Food_web_n2.gml'
+    # run!
     processgraphs(catalog,degdir,analysis, overwrite=False)
+    # save to pickle file
     analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')

@@ -27,7 +27,7 @@ Write launch scripts
 
 def writelaunch(minscripts, maxscripts, filename):
     """
-     Write launch script for some portion of the data
+     Write launch script for some portion of the data (at most 1000 jobs)
     """
     output = open(script_dir + 'launch%s.sh' %(filename), 'w')
     launch = \

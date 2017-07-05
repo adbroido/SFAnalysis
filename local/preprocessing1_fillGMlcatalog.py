@@ -5,6 +5,11 @@ import igraph
 import os
 import time
 
+""" Builds a catalog of gmls organized by type taking as input just the path to
+all of the gml directories. preprocess() is the only function designed to be
+called directly.
+
+"""
 
 
 def buildGMLcatalog(gmldirpath, df, avoiddirs, overwrite):
@@ -52,6 +57,7 @@ def buildGMLcatalog(gmldirpath, df, avoiddirs, overwrite):
         g = igraph.read(fp)
         splitfp = fp.split('/')
         name = splitfp[-1]
+        # add new row or overwrite existing row
         df.loc[name] = np.nan
         df.loc[name]['fp_gml'] = fp
         df.loc[name]['Domain'] = splitfp[-4]
@@ -64,6 +70,7 @@ def buildGMLcatalog(gmldirpath, df, avoiddirs, overwrite):
         df.loc[name]['Multigraph'] = sg.multigraph(g)
         df.loc[name]['Multiplex'] = sg.multiplex(g)
         if (df.loc[name] == 'error').any():
+            # this catches bad bipartite gmls
             df = df.drop(name)
     return df
 
@@ -71,7 +78,24 @@ def buildGMLcatalog(gmldirpath, df, avoiddirs, overwrite):
 
 def preprocess(gmldirpath, init=False, avoiddirs=[], overwrite=False, timeit=False, save=True):
     """
-    Sort the GMLs
+    Categorize the properties of the GMLs
+
+    Input:
+        gmldirpath                  string, path to outer gml directory
+                                    (containing all Domain folders and subfolders)
+        init                        Boolean, if True the catalog is rebuilt from
+                                    scratch
+        avoiddirs                   list, directories to avoid. For example 'n7'
+                                    Useful for avoiding bigger directories for
+                                    smaller preliminary analysis
+        overwrite                   Boolean, if True, all rows will be recreated
+        timeit                      Boolean, if True, elapsed time will print
+        save                        Boolean, if True, dataframe will save. Nice
+                                    to set to False when testing.
+
+    Output:
+        df                          DataFrame, gets saved to pickle file.
+
     """
     if init:
         df = pd.DataFrame(columns=['Domain', 'Subdomain', 'Graph_order',
@@ -88,7 +112,7 @@ def preprocess(gmldirpath, init=False, avoiddirs=[], overwrite=False, timeit=Fal
 
 
 if __name__ == '__main__':
-    # run this:
+    # path to gmls
     localpath = '/Users/annabroido/CU/gmls'
     externalpath = '/Volumes/Durodon/gmls'
     avoiddirs = ['n4', 'n5', 'n6', 'n7', 'n8', 'n9']
