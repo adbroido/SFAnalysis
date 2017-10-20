@@ -39,7 +39,7 @@ def writeerror(errormessage, size):
         f.write(errormessage)
     f.close()
 
-def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mgkey=0, mpkey=0, compkey):
+def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mgkey=0, mpkey=0, compkey=''):
     """ Reads in an igraph object and writes the degree sequence to a text file.
     Assumes that g has been processed already and is simple or directed only.
     A new row with basic information about the graph is added to analysis.
@@ -449,12 +449,12 @@ def processgraphs(catalog, degdir, overwrite=False):
 
 if __name__ == '__main__':
     # file path to degree sequences
-    degdir = '/Users/annabroido/Dropbox/Research/LRTAnalysis/degreesequences/'
+    degdir = '/Users/annabroido/Dropbox/Research/LRTAnalysis/newdegreesequences/'
     # read in gml catalog to pandas DataFrame
     catalog = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/gmlcatalog.p')
     # trim catalog to subset of entries. This step is optional
     catalog = catalog.query('Graph_order ==6')
     # run!
-    processgraphs(catalog,degdir,analysis, overwrite=False)
+    processgraphs(catalog,degdir, overwrite=True)
     # save to pickle file
-    analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
+    # analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
