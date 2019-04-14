@@ -34,14 +34,13 @@ def pl(x):
     # initialize array of the fits for every xmin
     fitV = np.zeros([len(xminV),2])
 
-    import time
     start_time = time.time()
     # initialize vector of constants
     # where the xmins start
     xminprev = min(xminV) - 1
     # initialize array of possible alpha values
     alstart = 1.01
-    shift = 5.50
+    shift = 9.50
     alphaV = np.arange(alstart,alstart+shift,0.01)
     zetaV = sp.zeta(alphaV)
     constV = zetaV
@@ -51,11 +50,9 @@ def pl(x):
 
     # loop over the xmin values at find the best fit at each
     for i in range(len(xminV)):
-
         xmin = xminV[i]
         xtail = x[x>=xmin]
         ntail = len(xtail)
-
         # optimize over alpha
         # find the corresponding array of conditional log likelihoods
         Ls = -alphaV*np.sum(np.log(xtail)) - ntail*np.log(constV)
@@ -68,10 +65,8 @@ def pl(x):
         cdf = np.cumsum(range(np.min(xtail), np.max(xtail)+1)**(-alpha)/constV[aind])
         #  binned data
         xhist = np.histogram(xtail,range(np.min(xtail), np.max(xtail)+2))
-
         # empirical cdf
         edf = np.cumsum(xhist[0])/float(ntail)
-
         # KS stat
         ks = np.max(np.abs(cdf-edf))
         # add this KS stat and alpha to the array of fits
@@ -95,9 +90,9 @@ def pl(x):
     start_time = time.time()
     const = sp.zeta(alpha) - np.sum(np.arange(1,xmin)**(-alpha))
     L = -alpha * np.sum(np.log(xtail)) - ntail*np.log(const)
-    #print "-------%s seconds -----------" %(time.time()-start_time)
-    #print "alpha = %s" %alpha
-    #print "xmin = %s" %xmin
+    # print "-------%s seconds -----------" %(time.time()-start_time)
+    # print "alpha = %s" %alpha
+    # print "xmin = %s" %xmin
     return [alpha,xmin, ntail, L, ks]
 
 def plpval(x, alpha, xmin, gof):
@@ -177,6 +172,12 @@ def plpval(x, alpha, xmin, gof):
         # print "[%s]    p = %f" %(resamp_ind, current_p)
         # store gof stat
         bootstraps[resamp_ind] = newgof
+        # if it's taking forever and we can end, do it
+        if time.time() - starttime > 500:
+            if resamp_ind > num_resamps/20.:
+                if current_p<0.05 or current_p>0.5:
+                    print "current p = %s   elapsed time = %s" %(current_p, time.time()-starttime)
+                    return current_p
     p = np.sum(bootstraps>=gof)/float(num_resamps)
     print "p = %s   elapsed time = %s" %(p, time.time()-starttime)
     return p
@@ -200,15 +201,22 @@ def exp(x):
     def logpdf(x,lam):
         result = np.log(1-np.exp(-lam))+lam*xmin - lam*x
         return result
-    # Moment based estimate for optimzation
-    lam0 = np.log(1+float(ntail)/np.sum(x-xmin))
-    # define negative log likelihood, the function we wish to minimize
-    negloglike = lambda lam: -np.sum(logpdf(x,lam))
-    tol = 1E-9
-    res = op.minimize(negloglike,lam0, bounds=[(tol,None)],method='L-BFGS-B')
-    lam = np.asscalar(res.x)
-    convstatus = res.success
-    LV = logpdf(x,lam)
+    if len(np.unique(x))<2:
+        # this means every value is equal to xmin
+        # return dummy answers and say we don't converge
+        lam = 0
+        LV =0
+        convstatus = False
+    else:
+        # Moment based estimate for optimzation
+        lam0 = np.log(1+float(ntail)/np.sum(x-xmin))
+        # define negative log likelihood, the function we wish to minimize
+        negloglike = lambda lam: -np.sum(logpdf(x,lam))
+        tol = 1E-9
+        res = op.minimize(negloglike,lam0, bounds=[(tol,None)],method='L-BFGS-B')
+        lam = np.asscalar(res.x)
+        convstatus = res.success
+        LV = logpdf(x,lam)
     return [lam, LV, convstatus]
 
 def ln(x):

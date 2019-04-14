@@ -54,6 +54,7 @@ def buildGMLcatalog(gmldirpath, df, avoiddirs, overwrite):
         newfpV = fpV
     # update the catalog
     for fp in newfpV:
+        print fp
         g = igraph.read(fp)
         splitfp = fp.split('/')
         name = splitfp[-1]
@@ -101,21 +102,21 @@ def preprocess(gmldirpath, init=False, avoiddirs=[], overwrite=False, timeit=Fal
         df = pd.DataFrame(columns=['Domain', 'Subdomain', 'Graph_order',
                 'fp_gml', 'Weighted', 'Directed', 'Bipartite', 'Multigraph', 'Multiplex'])
     else:
-        df = pd.read_pickle('gmlcatalog.p')
+        df = pd.read_pickle('newgmlcatalog.p')
     start = time.time()
     df = buildGMLcatalog(gmldirpath, df, avoiddirs, overwrite)
     elapsed = time.time()-start
     if timeit:
         print 'Elapsed time is %s seconds' %elapsed
     if save:
-        df.to_pickle('gmlcatalog.p')
+        df.to_pickle('newgmlcatalog.p')
 
 
 if __name__ == '__main__':
     # path to gmls
     localpath = '/Users/annabroido/CU/gmls'
-    externalpath = '/Volumes/Durodon/gmls'
-    avoiddirs = ['n4', 'n5', 'n6', 'n7', 'n8', 'n9']
-    avoiddirs=[]
+    externalpath = '/Volumes/External/gmls'
+    avoiddirs = [ 'n7', 'n8', 'n9']
+    # avoiddirs=[]
     #df = buildGMLcatalog(externalpath, df, avoiddirs, overwrite=True)
-    preprocess(externalpath, timeit=True, avoiddirs=avoiddirs)
+    preprocess(externalpath, timeit=True, avoiddirs=avoiddirs, save=True)

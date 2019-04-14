@@ -4,8 +4,12 @@
 *.pkl
 *.o*
 *.sh
+*.p
+*.ipynb
+*.csv
+.ipynb_checkpoints/
 oldorplay/
 output/
-pando/scripts/
-local/notshareworthy
-pando/notshareworthy
+local/
+pando/
+degreesequences/

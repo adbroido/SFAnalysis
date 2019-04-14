@@ -26,9 +26,9 @@ def writeerror(errormessage, size):
                                 which error file to write to.
     """
     if size=='small':
-        errorfp = 'degseqerror_small.txt'
+        errorfp = 'newdegseqerror_small.txt'
     elif size=='big':
-        errorfp = 'degseqerror_big.txt'
+        errorfp = 'newdegseqerror_big.txt'
     known = False
     f = open(errorfp, 'a+')
     f.seek(0)
@@ -39,7 +39,7 @@ def writeerror(errormessage, size):
         f.write(errormessage)
     f.close()
 
-def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mgkey=0, mpkey=0, compkey=''):
+def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mgkey=0, mpkey=0):
     """ Reads in an igraph object and writes the degree sequence to a text file.
     Assumes that g has been processed already and is simple or directed only.
     A new row with basic information about the graph is added to analysis.
@@ -62,8 +62,6 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
                                 multigraph 0 for not multigraph.
         mpkey                   int or string, indicates edge type that generated
                                 this subgraph. 0 for not weighted.
-        compkey                 string, indicates weighting threshold or
-                                simplification algorithm. 0 for not weighted.
 
 
     Output:
@@ -81,19 +79,27 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
         print 'something is wrong with your dirkey'
     # get file name
     splitfp = fp.split('/')
-    domain = splitfp[-4]
-    subdomain = splitfp[-3]
-    gsize = int(splitfp[-2][1:]) # cut out the 'n'
-    gmlname = splitfp[-1]
+    if len(splitfp)>1:
+        domain = splitfp[-4]
+        subdomain = splitfp[-3]
+        gsize = int(splitfp[-2][1:]) # cut out the 'n'
+        gmlname = splitfp[-1]
+    else:
+        domain = 'na'
+        subdomain = 'na'
+        gsize = 'na'
+        gmlname = fp
     fn = gmlname+namekey + 'distribution.txt'
     # check if degree sequence is too dense and don't write to file if so
     meandeg = np.mean(deg)
     if meandeg> np.sqrt(len(deg)):
         errormessage = "%s is too dense \n" %fn
+        print(errormessage)
         writeerror(errormessage, 'big')
     # check if mean degree is too small and don't write to file if so
     elif meandeg < 2:
         errormessage = "%s mean degree is too small \n" %fn
+        print(errormessage)
         writeerror(errormessage, 'small')
     else:
         # write degree sequence file. Each row is xvalue,count
@@ -116,25 +122,6 @@ def readdeg(g, fp, degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0,
         analysis.loc[fn]['Bipartite'] = bipkey
         analysis.loc[fn]['Multigraph'] = mgkey
         analysis.loc[fn]['Multiplex'] = mpkey
-        analysis.loc[fn]['Component'] = compkey
-
-def checkconnected(g,fp,degdir, analysis, namekey='', bipkey=0, weighkey=0, dirkey=0, mpkey=0, mgkey=0):
-    """ Checks if a graph is connected. If not, pull out 2 degree sequences:
-    entire graph and jsut the largest component.
-
-    """
-    # if g is not connected, pull out the largest component
-    if g.is_connected():
-        compkey = 'connected'
-        readdeg(g,fp,degdir, analysis, namekey=namekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
-    else:
-        compkey = 'entire'
-        readdeg(g,fp,degdir, analysis, namekey=namekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
-        clust = g.clusters() # note that the components function seems identical
-        largecomp = g.subgraph(clust[0])
-        newnamekey = namekey+ '_largestcomp'
-        compkey = 'largest'
-        readdeg(largecomp,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mpkey=mpkey, mgkey=mgkey, compkey=compkey)
 
 def processdirected(g, fp, degdir, analysis,  namekey='', bipkey=0, mpkey=0, weighkey=0, mgkey=0):
     """ Processes a directed graph. The graph is split into three: in-degree,
@@ -144,7 +131,7 @@ def processdirected(g, fp, degdir, analysis,  namekey='', bipkey=0, mpkey=0, wei
     keyV = [('in', '_directedin'), ('out','_directedout'), ('total', '_directedtotal')]
     for dirkey, dirnamekey in keyV:
         newnamekey = namekey+dirnamekey
-        checkconnected(g,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mgkey=0, mpkey=mpkey)
+        readdeg(g,fp,degdir, analysis, namekey=newnamekey, bipkey=bipkey, weighkey=weighkey, dirkey=dirkey, mgkey=0, mpkey=mpkey)
 
 def find_threshold(weights, target_num_edges, left=0):
     """ Given a target number of edges in a new subgraph and a list of current
@@ -206,7 +193,7 @@ def oneweighted(g, fp, degdir, analysis, weights, thresh, namekey, weighkey):
     if subg.is_directed():
         processdirected(subg,fp,degdir,analysis, namekey=namekey,weighkey=weighkey)
     else:
-        checkconnected(subg,fp,degdir,analysis, namekey=namekey,weighkey=weighkey)
+        readdeg(subg,fp,degdir,analysis, namekey=namekey,weighkey=weighkey)
 
 def processweighted(g, fp, degdir, analysis):
     """ Processes a weighted graph. This is only for graphs that are not
@@ -261,7 +248,7 @@ def processmultigraph(g, fp, degdir, analysis, namekey='', mpkey=0, bipkey=0):
     if sg.directed(g):
         processdirected(g,fp,degdir,analysis, namekey=namekey, mpkey=mpkey, bipkey=bipkey, mgkey=mgkey, weighkey=weighkey)
     else:
-        checkconnected(g,fp,degdir,analysis, namekey=namekey, mpkey=mpkey, bipkey=bipkey, mgkey=mgkey, weighkey=weighkey)
+        readdeg(g,fp,degdir,analysis, namekey=namekey, mpkey=mpkey, bipkey=bipkey, mgkey=mgkey, weighkey=weighkey)
 
 
 
@@ -279,7 +266,7 @@ def onebipartite(g,fp,degdir, analysis, namekey,mpkey, bipkey):
     elif g.is_directed():
         processdirected(g,fp, degdir, analysis, namekey=namekey, mpkey=0, bipkey=bipkey)
     else:
-        checkconnected(g,fp,degdir,analysis, namekey=namekey, mpkey=0, bipkey=bipkey)
+        readdeg(g,fp,degdir,analysis, namekey=namekey, mpkey=0, bipkey=bipkey)
 
 
 def processbipartite(g, fp, degdir, analysis, namekey='', mpkey=0):
@@ -302,6 +289,7 @@ def processbipartite(g, fp, degdir, analysis, namekey='', mpkey=0):
     uniquetypes = np.unique(types)
     types[types==uniquetypes[0]] = 0
     types[types==uniquetypes[1]] = 1
+    print fp
     types = np.asarray([int(t) for t in types])
     g.vs['type'] = types
 
@@ -356,7 +344,7 @@ def processmultiplex(g, fp, degdir, analysis):
             elif sg.directed(graph)==1:
                 processdirected(graph, fp, degdir, analysis, namekey=namekey, mpkey=mpkey)
             else:
-                checkconnected(g, fp,degdir,analysis, namekey=namekey, mpkey=mpkey)
+                readdeg(graph, fp,degdir,analysis, namekey=namekey, mpkey=mpkey)
     # If, however, there is one edge type, assume the split is in this, and
     # look at the values of this attribute
     else:
@@ -382,7 +370,7 @@ def processmultiplex(g, fp, degdir, analysis):
             elif sg.directed(graph)==1:
                 processdirected(graph, fp, degdir, analysis, namekey=namekey, mpkey=mpkey)
             else:
-                checkconnected(g, fp,degdir,analysis, namekey=namekey, mpkey=mpkey)
+                readdeg(graph, fp,degdir,analysis, namekey=namekey, mpkey=mpkey)
 
         # process the union graph
         graph = g
@@ -397,7 +385,7 @@ def processmultiplex(g, fp, degdir, analysis):
         elif sg.directed(graph)==1:
             processdirected(graph, fp, degdir, analysis, namekey=namekey, mpkey=mpkey)
         else:
-            checkconnected(graph, fp, degdir, analysis, namekey=namekey, mpkey=mpkey)
+            readdeg(graph, fp, degdir, analysis, namekey=namekey, mpkey=mpkey)
 
 def processgraphs(catalog, degdir, overwrite=False):
     """ Takes catalog of gml files and their structural properties(weighted,
@@ -417,15 +405,15 @@ def processgraphs(catalog, degdir, overwrite=False):
     fpV = catalog['fp_gml']
     # only add new files
     if overwrite == False:
-        analysis = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
+        analysis = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/SFAnalysis/local/deleteanalysis.p')
         fpV = set(fpV).difference(set(analysis['fp_gml']))
     else:
         analysis = pd.DataFrame(columns=['Domain', 'Subdomain', 'num_edges',
                                          'Graph_order', 'Weighted', u'Directed',
                                          'Bipartite', 'Multigraph', 'Multiplex',
-                                         'Component', 'fp_gml', 'n', 'alpha',
-                                         'xmin', 'ntail', 'Lpl', 'ppl', 'dexp',
-                                         'dln', 'dstrexp', 'dplwc', 'meandeg'])
+                                         'fp_gml', 'n', 'alpha', 'xmin','ntail',
+                                         'Lpl', 'ppl', 'dexp', 'dln', 'dstrexp',
+                                         'dplwc', 'meandeg'])
     for fp in fpV:
         g = igraph.read(fp)
         #### find what kind of graph this is (follow hierarchical ordering of types)
@@ -442,19 +430,19 @@ def processgraphs(catalog, degdir, overwrite=False):
         elif row['Directed'].item() == 1:
             processdirected(g, fp, degdir,analysis)
         else:
-            checkconnected(g, fp,degdir,analysis)
+            readdeg(g, fp,degdir,analysis)
+    # save to pickle file
+    analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/SFAnalysis/local/deleteanalysis.p')
     print 'All done!'
 
 
 
 if __name__ == '__main__':
     # file path to degree sequences
-    degdir = '/Users/annabroido/Dropbox/Research/LRTAnalysis/newdegreesequences/'
+    degdir = '/Users/annabroido/Dropbox/Research/LRTAnalysis/deletethesedegreesequences/'
     # read in gml catalog to pandas DataFrame
-    catalog = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/gmlcatalog.p')
+    catalog = pd.read_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/SFAnalysis/local/newgmlcatalog.p')
     # trim catalog to subset of entries. This step is optional
-    catalog = catalog.query('Graph_order ==6')
+    catalog = catalog.query('Graph_order <= 6')
     # run!
     processgraphs(catalog,degdir, overwrite=True)
-    # save to pickle file
-    # analysis.to_pickle('/Users/annabroido/Dropbox/Research/LRTAnalysis/LRTAnalysis/analysis/analysis.p')
