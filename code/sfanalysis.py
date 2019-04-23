@@ -469,7 +469,7 @@ def organize_degree_sequences(deg_dir):
                                          'dplwc', 'meandeg'], index = fnV)
 
     for fn in fnV:
-        analysis.loc[fn]['fp_gml'] = 'na'
+        analysis_df.loc[fn]['fp_gml'] = 'na'
     return analysis_df
 
 def writeerror_analysis(errormessage):

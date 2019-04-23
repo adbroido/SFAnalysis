@@ -334,11 +334,11 @@ def strexp(x):
         return np.array([shape,scale])
 
     # define log pdf, for use in likelihood calculation
-    def logpdf(x, a, b):
+    def logpdf(x, a, b, tol_pad = 1E-8):
         xmin = np.min(x)
         F = lambda x: np.exp(-(x/b)**a)
         g = lambda x: F(x)-F(x+1)
-        h = -np.log(F(xmin))+np.log(g(x))
+        h = -np.log(F(xmin)+tol_pad)+np.log(g(x)+tol_pad)
         return h
     # initial estimates
     # initial estimates

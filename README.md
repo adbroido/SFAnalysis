@@ -1,1 +1,1 @@
-# LRTanalysis
+# Scale-free network analysis
