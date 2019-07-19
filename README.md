@@ -1,12 +1,12 @@
 # Scale-free network analysis
 
-This repo contains the code for analyzing scale-free patterns in networks as described in this paper(https://www.nature.com/articles/s41467-019-08746-5). The data sets used in the paper are in the *degreesequences* directory.
+This repo contains the code for analyzing scale-free patterns in networks as described in [this paper](https://www.nature.com/articles/s41467-019-08746-5). The data sets used in the paper are in the `degreesequences` directory.
 
 ## Citation information
 
 If you use this code in your research, please cite this repo and/or the paper (linked above):
 
- Anna D. Broido & Aaron Clauset, Scale-free networks are rare, Nature Communications **10**, 1017 (2019).
+ Anna D. Broido & Aaron Clauset, "Scale-free networks are rare", *Nature Communications* **10**, 1017 (2019).
 
 ## Usage
 
