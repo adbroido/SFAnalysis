@@ -179,7 +179,7 @@ def plpval(x, alpha, xmin, gof):
                     print "current p = %s   elapsed time = %s" %(current_p, time.time()-starttime)
                     return current_p
     p = np.sum(bootstraps>=gof)/float(num_resamps)
-    print "p = %s   elapsed time = %s" %(p, time.time()-starttime)
+    print "p = %.3f   elapsed time = %s" %(p, time.time()-starttime)
     return p
 
 def exp(x):
