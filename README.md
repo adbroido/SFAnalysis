@@ -6,7 +6,7 @@ This repo contains the code for analyzing scale-free patterns in networks as des
 
 If you use this code in your research, please cite this repo and/or the paper (linked above):
 
- Anna D. Broido & Aaron Clauset, Scale-free networks are rare, Nature Communications **10**, 1017 (2019).
+ Anna D. Broido & Aaron Clauset, "Scale-free networks are rare", *Nature Communications* **10**, 1017 (2019).
 
 ## Usage
 
