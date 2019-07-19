@@ -1,11 +1,9 @@
 *.pyc
 *.pdf
-*.gml
 *.pkl
 *.o*
 *.sh
 *.p
-*.ipynb
 *.csv
 .ipynb_checkpoints/
 oldorplay/
